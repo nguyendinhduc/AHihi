@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AHihi</string>
+    <string name="activity_image">Images</string>
+    <string name="activity_call_logs">Call Logs</string>
+    <string name="activity_country_codes">Country Codes</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="forgot_password"><u>Forgot password?</u></string>
+    <string name="log_in">LOG IN</string>
+    <string name="sign_up">SIGN UP</string>
+    <string name="open_navigation_drawer">OPEN</string>
+    <string name="close_navigation_drawer">CLOSE</string>
+    <string name="already_user">Already a user? <b>LOGIN</b></string>
+    <string name="new_user">New user? <b>REGISTER</b></string>
+</resources>

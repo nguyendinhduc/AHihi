@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <View
+        android:id="@+id/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_below="@+id/toolbar"
+        android:background="@drawable/shadow" />
+
+    <TextView
+        android:id="@+id/txtLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/shadow"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="32dp"
+        android:text="Profile Picture"
+        android:textColor="@color/green_500"
+        android:textSize="32sp" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imgAvatar"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/shadow"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_avatar_default" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/imgAvatar"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_layout_white"
+        android:padding="16dp">
+
+        <Button
+            android:id="@+id/btnOK"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/bg_button"
+            android:text="SAVE AND CONTINUE"
+            android:textColor="#ffffff"
+            android:textStyle="bold" />
+
+        <GridView
+            android:id="@+id/gridViewAvatarDefault"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/btnOK"
+            android:layout_marginBottom="16dp"
+            android:clipToPadding="false"
+            android:horizontalSpacing="4dp"
+            android:numColumns="3"
+            android:padding="4dp"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="4dp" />
+
+    </RelativeLayout>
+
+</RelativeLayout>
