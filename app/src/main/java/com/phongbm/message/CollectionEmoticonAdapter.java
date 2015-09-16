@@ -36,7 +36,7 @@ public class CollectionEmoticonAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        View view = layoutInflater.inflate(R.layout.item_collection_emoticon, container, false);
+        View view = layoutInflater.inflate(R.layout.item_collection_emoticon, null);
         GridView gridViewPage = (GridView) view.findViewById(R.id.gridViewEmoticon);
         gridViewPage.setAdapter(collectionEmoticonItems.get(position).getEmoticonAdapter());
         ((ViewPager) container).addView(view);
@@ -47,5 +47,6 @@ public class CollectionEmoticonAdapter extends PagerAdapter {
     public void destroyItem(ViewGroup container, int position, Object object) {
         ((ViewPager) container).removeView((View) object);
     }
+
 
 }

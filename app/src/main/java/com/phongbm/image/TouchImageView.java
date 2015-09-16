@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -103,10 +102,6 @@ public class TouchImageView extends ImageView {
         onDrawReady = false;
         super.setOnTouchListener(new PrivateOnTouchListener());
     }
-
-//    public Pair<Float, Float> getFocus() {
-//        return new Pair<>(delayedZoomVariables.focusX, delayedZoomVariables.focusY);
-//    }
 
     @Override
     public void setOnTouchListener(OnTouchListener l) {
@@ -495,9 +490,15 @@ public class TouchImageView extends ImageView {
 
     private void translateMatrixAfterRotate(int axis, float trans, float prevImageSize, float imageSize, int prevViewSize, int viewSize, int drawableSize) {
         if (imageSize < viewSize) {
+            //
+            // The width/height of image is less than the view's width/height. Center it.
+            //
             m[axis] = (viewSize - (drawableSize * m[Matrix.MSCALE_X])) * 0.5f;
 
         } else if (trans > 0) {
+            //
+            // The image is larger than the view, but was not before rotation. Center it.
+            //
             m[axis] = -((imageSize - viewSize) * 0.5f);
 
         } else {

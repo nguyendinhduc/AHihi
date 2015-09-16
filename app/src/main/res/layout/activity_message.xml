@@ -61,6 +61,8 @@
                 android:orientation="horizontal">
 
                 <ImageView
+                    android:id="@+id/btnCamera"
+                    style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:contentDescription="@null"
@@ -84,6 +86,7 @@
 
                 <ImageView
                     android:id="@+id/imgEmoticon"
+                    style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginLeft="8dp"
@@ -95,6 +98,7 @@
                     android:tint="#9e9e9e" />
 
                 <ImageView
+                    style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginLeft="8dp"
@@ -106,6 +110,7 @@
                     android:tint="#9e9e9e" />
 
                 <ImageView
+                    style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginLeft="8dp"
@@ -127,7 +132,7 @@
             android:paddingLeft="8dp"
             android:paddingRight="8dp">
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/btnAttach"
                 style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
                 android:layout_width="48dp"

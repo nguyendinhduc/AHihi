@@ -42,4 +42,6 @@ dependencies {
     compile 'com.parse.bolts:bolts-android:+'
     compile 'de.hdodenhof:circleimageview:+'
     compile 'com.hudomju:swipe-to-dismiss-undo:+'
+    compile 'com.squareup.picasso:picasso:+'
+    compile 'com.github.recruit-lifestyle:FloatingView:+'
 }

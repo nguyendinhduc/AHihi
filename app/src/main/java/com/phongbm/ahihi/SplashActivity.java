@@ -7,7 +7,9 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+import com.parse.ParseException;
 import com.parse.ParseUser;
+import com.phongbm.common.GlobalApplication;
 import com.phongbm.loginsignup.MainFragment;
 
 public class SplashActivity extends AppCompatActivity {
@@ -24,7 +26,10 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 ParseUser currentUser = ParseUser.getCurrentUser();
-                if (currentUser != null) {
+                if (currentUser != null && currentUser.getUsername() != null && currentUser.getEmail() != null) {
+                    GlobalApplication.startWaittingAHihi = true;
+                    GlobalApplication.startActivityMessage = true;
+                    GlobalApplication.checkLoginThisId = true;
                     currentUser.put("isOnline", true);
                     currentUser.saveInBackground();
                     Intent intent = new Intent(SplashActivity.this, MainActivity.class);

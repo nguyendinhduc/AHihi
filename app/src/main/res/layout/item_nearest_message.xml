@@ -49,9 +49,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/txtFullName"
+            android:maxLength="40"
             android:text="Hello android"
-            android:textSize="16dp"
-            android:maxLength="40"/>
+            android:textSize="16dp" />
 
     </RelativeLayout>
 

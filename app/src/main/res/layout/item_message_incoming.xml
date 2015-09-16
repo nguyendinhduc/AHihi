@@ -10,14 +10,15 @@
     <View
         android:id="@+id/space"
         android:layout_width="match_parent"
-        android:layout_height="8dp"
+        android:layout_height="16dp"
         android:layout_alignParentTop="true"
         android:background="@android:color/transparent"
         android:visibility="gone" />
 
     <RelativeLayout
+        android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/space">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -84,5 +85,20 @@
         </LinearLayout>
 
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/txtDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginEnd="42dp"
+        android:layout_marginRight="42dp"
+        android:layout_marginTop="2dp"
+        android:background="#2196f3"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:textColor="#ffffff"
+        android:textSize="12sp" />
 
 </RelativeLayout>

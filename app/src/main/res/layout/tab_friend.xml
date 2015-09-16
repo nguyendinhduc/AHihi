@@ -71,14 +71,13 @@
                 android:id="@+id/txtFullName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Phong Bui Minh"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/txtStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ONLINE"
                 android:textColor="@color/green_500"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -96,12 +95,22 @@
 
     </RelativeLayout>
 
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/me"
+        android:layout_marginEnd="16dp"
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="48dp"
+        android:background="#e0e0e0" />
+
     <ListView
         android:id="@+id/listViewFriend"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/me"
-        android:layout_marginTop="8dp"
+        android:layout_below="@+id/divider"
         android:background="#ffffff" />
 
 </RelativeLayout>

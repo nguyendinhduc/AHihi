@@ -18,9 +18,10 @@ import android.widget.ImageView;
 
 import com.phongbm.ahihi.R;
 import com.phongbm.common.CommonMethod;
-import com.phongbm.common.GlobalApplication;
 import com.phongbm.libs.SquareImageView;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -28,13 +29,16 @@ public class ImageAdapter extends BaseAdapter {
     private static final String TAG = "ImageAdapter";
     private Context context;
     private ArrayList<String> imageURLs;
-    volatile private ArrayList<Bitmap> bitmaps;
+    volatile private ArrayList<ImageState> imageStates;
     private LayoutInflater layoutInflater;
 
     public ImageAdapter(Context context) {
         this.context = context;
         layoutInflater = LayoutInflater.from(context);
         initializeListImage();
+        for (String i : imageURLs) {
+            Log.i(TAG, "uri: " + i);
+        }
         initializeListImageState();
     }
 
@@ -53,9 +57,9 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     private void initializeListImageState() {
-        bitmaps = new ArrayList<Bitmap>();
-        for ( int i = 0; i < imageURLs.size(); i++ ) {
-            bitmaps.add(null);
+        imageStates = new ArrayList<ImageState>();
+        for (int i = 0; i < imageURLs.size(); i++) {
+            imageStates.add(new ImageState());
         }
     }
 
@@ -84,9 +88,14 @@ public class ImageAdapter extends BaseAdapter {
         } else {
             imgImage = (SquareImageView) convertView.getTag();
         }
-
-        loadBitmap(position, imageURLs.get(position), imgImage);
-
+        // loadBitmap(position, imageURLs.get(position), imgImage);
+        Picasso.with(parent.getContext())
+                .load(new File(imageURLs.get(position)))
+                .resize(300, 300)
+                .placeholder(R.drawable.loading_picture)
+                .error(R.drawable.ic_launcher_ahihi)
+                .centerCrop()
+                .into(imgImage);
 
         return convertView;
     }
@@ -115,14 +124,43 @@ public class ImageAdapter extends BaseAdapter {
         return BitmapFactory.decodeFile(data, options);
     }
 
+    private class ImageState {
+        Bitmap image;
+        boolean isLoading = false, isFinish = false;
+    }
+
+    private class ImageAsyncTask extends AsyncTask<String, Bitmap, Void> {
+        int position = -1;
+        ImageView picture = null;
+
+        public ImageAsyncTask(int position, ImageView picture) {
+            this.position = position;
+            this.picture = picture;
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            Bitmap bitmap = decodeSampledBitmapFromMemory(params[0], 100, 100);
+            publishProgress(bitmap);
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Bitmap... values) {
+            picture.setImageBitmap(values[0]);
+            imageStates.get(this.position).image = values[0];
+            imageStates.get(this.position).isFinish = true;
+        }
+    }
+
     public void loadBitmap(int position, String data, ImageView imageView) {
         if (cancelPotentialWork(data, imageView)) {
             final BitmapWorkerTask task = new BitmapWorkerTask(position, imageView);
             final AsyncDrawable asyncDrawable =
-                    new AsyncDrawable(this.context.getResources(), bitmaps.get(position) != null ? bitmaps.get(position) :
+                    new AsyncDrawable(this.context.getResources(), imageStates.get(position).image != null ? imageStates.get(position).image :
                             BitmapFactory.decodeResource(context.getResources(), R.drawable.download), task);
             imageView.setImageDrawable(asyncDrawable);
-            if (bitmaps.get(position) == null) {
+            if (imageStates.get(position).image == null) {
                 task.execute(data);
             }
         }
@@ -149,11 +187,14 @@ public class ImageAdapter extends BaseAdapter {
         if (bitmapWorkerTask != null) {
             final String bitmapData = bitmapWorkerTask.data;
             if (!bitmapData.equals(data)) {
+                // Cancel previous task
                 bitmapWorkerTask.cancel(true);
             } else {
+                // The same work is already in progress
                 return false;
             }
         }
+        // No task associated with the ImageView, or an existing task was cancelled
         return true;
     }
 
@@ -174,33 +215,32 @@ public class ImageAdapter extends BaseAdapter {
         private int position = -1;
 
         public BitmapWorkerTask(int posistion, ImageView imageView) {
+            // Use a WeakReference to ensure the ImageView can be garbage collected
             this.position = posistion;
             imageViewReference = new WeakReference<ImageView>(imageView);
         }
 
+        // Decode image in background.
         @Override
         protected Bitmap doInBackground(String... params) {
             data = params[0];
-            if (bitmaps.get(this.position) != null) return null;
-            else {
-                CommonMethod commonMethod = CommonMethod.getInstance();
-                float sizeImage = (GlobalApplication.WIDTH_SCREEN - 16 * (GlobalApplication.DENSITY / 160)) / 3;
-                int orientation = commonMethod.getOrientation(data);
-                return commonMethod.getBitmap(orientation,
-                        commonMethod.decodeSampledBitmapFromResource(data, (int) sizeImage, (int) sizeImage));
-            }
+            if (imageStates.get(this.position).image != null) return null;
+            else return CommonMethod.getInstance().decodeSampledBitmapFromResource(data, 300, 300);
         }
 
+        // Once complete, see if ImageView is still around and set bitmap.
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             if (imageViewReference != null && bitmap != null) {
                 final ImageView imageView = imageViewReference.get();
                 if (imageView != null) {
                     imageView.setImageBitmap(bitmap);
-                    bitmaps.remove(this.position);
-                    bitmaps.add(this.position, bitmap);
+                    imageStates.get(this.position).image = bitmap;
+                    imageStates.get(this.position).isFinish = true;
                 }
             }
         }
     }
+
+
 }

@@ -15,7 +15,6 @@
         android:cursorVisible="false"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:text="Viet Nam (+84)"
         android:textColor="@color/green_500" />
 
     <android.support.design.widget.TextInputLayout

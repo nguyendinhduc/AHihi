@@ -1,6 +1,5 @@
 package com.phongbm.call;
 
-import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -14,6 +13,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.Vibrator;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
@@ -53,6 +54,7 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
     private Thread threadTimeCall;
     private CommonMethod commonMethod;
     private CallLogsDBManager callLogsDBManager;
+    private Vibrator vibrator;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -75,7 +77,13 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
         this.setContentView(R.layout.activity_incoming_call);
         this.initializeComponent();
         this.registerBroadcastInComingCall();
+
         this.setVolumeControlStream(AudioManager.STREAM_RING);
+
+        vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+        long pattern[] = {0, 500, 1000};
+        vibrator.vibrate(pattern, 0);
+
         ringtoneManager = new RingtoneManager(this);
         ringtoneManager.playRingtone();
         callLogsDBManager = new CallLogsDBManager(this);
@@ -133,6 +141,8 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
                 isCalling = true;
                 btnAnswer.setEnabled(false);
                 ringtoneManager.stopRingtone();
+                vibrator.cancel();
+
                 this.setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
                 Intent intentAnswer = new Intent(CommonValue.ACTION_ANSWER);
                 this.sendBroadcast(intentAnswer);
@@ -142,6 +152,8 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
                 date = commonMethod.getCurrentDateTime();
                 btnAnswer.setEnabled(false);
                 ringtoneManager.stopRingtone();
+                vibrator.cancel();
+
                 this.setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
                 Intent intentHangup = new Intent(CommonValue.ACTION_END_CALL);
                 this.sendBroadcast(intentHangup);
@@ -175,6 +187,7 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
                         txtTime.setText("End Call: " + time);
                         state = "inComingCall";
                     } else {
+                        vibrator.cancel();
                         ringtoneManager.stopRingtone();
                         commonMethod.pushNotification(InComingCallActivity.this, CallLogActivity.class,
                                 "Missed Call", NOTIFICATION_MISSED_CALL,
@@ -185,8 +198,8 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
                     if (date == null) {
                         date = commonMethod.getCurrentDateTime();
                     }
-                    txtTime.setBackgroundColor(InComingCallActivity.this.getResources()
-                            .getColor(R.color.red_500));
+                    txtTime.setBackgroundColor(ContextCompat.getColor(InComingCallActivity.this,
+                            R.color.red_500));
                     callingRipple.setVisibility(RelativeLayout.GONE);
                     InComingCallActivity.this.setVolumeControlStream(
                             AudioManager.USE_DEFAULT_STREAM_TYPE);

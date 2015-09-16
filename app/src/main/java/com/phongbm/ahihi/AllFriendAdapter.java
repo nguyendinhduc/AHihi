@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,7 +57,7 @@ public class AllFriendAdapter extends BaseAdapter {
             parseQuery.getFirstInBackground(new GetCallback<ParseUser>() {
                 @Override
                 public void done(final ParseUser parseUser, ParseException e) {
-                    ParseFile parseFile = (ParseFile) parseUser.get("avatar");
+                    final ParseFile parseFile = (ParseFile) parseUser.get("avatar");
                     if (parseFile == null) {
                         return;
                     }
@@ -67,13 +68,20 @@ public class AllFriendAdapter extends BaseAdapter {
                                 return;
                             }
                             Bitmap avatar = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                            allFriendItems.add(new AllFriendItem(parseUser.getObjectId(), avatar,
-                                    parseUser.getUsername(), parseUser.getString("fullName")));
+                            AllFriendItem allFriendItem = new AllFriendItem(parseUser.getObjectId(), avatar,
+                                    parseUser.getUsername(), parseUser.getString("fullName"));
+
+                            String urlAvatar = parseFile.getUrl();
+                            allFriendItem.setUrlAvatar(urlAvatar);
+                            allFriendItems.add(allFriendItem);
+
                             Collections.sort(allFriendItems);
 
                             if (parseUser.getBoolean("isOnline")) {
-                                activeFriendItems.add(new ActiveFriendItem(parseUser.getObjectId(),
-                                        avatar, parseUser.getUsername(), parseUser.getString("fullName")));
+                                ActiveFriendItem activeFriendItem = new ActiveFriendItem(parseUser.getObjectId(),
+                                        avatar, parseUser.getUsername(), parseUser.getString("fullName"));
+                                activeFriendItem.setUrlAvatar(urlAvatar);
+                                activeFriendItems.add(activeFriendItem);
                             }
                         }
                     });

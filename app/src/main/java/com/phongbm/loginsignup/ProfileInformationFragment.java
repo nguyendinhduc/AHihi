@@ -16,16 +16,27 @@ import android.widget.RadioButton;
 
 import com.phongbm.ahihi.R;
 
-public class ProfileInfomationFragment extends Fragment implements View.OnClickListener {
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class ProfileInformationFragment extends Fragment implements View.OnClickListener {
     private View view;
     private EditText edtBirthday, edtFirstName, edtLastName, edtEmail;
     private Button btnOK;
     private RadioButton radioMale, radioFemale;
     private boolean isFillFirstName, isFillLastName, isFillEmail;
+    private static final String EMAIL_PATTERN =
+            "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+    private Pattern pattern;
+    private Matcher matcher;
+
+    public ProfileInformationFragment() {
+        pattern = Pattern.compile(EMAIL_PATTERN);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_profile_infomation, container, false);
+        view = inflater.inflate(R.layout.fragment_profile_infomation, null);
         this.initializeToolbar();
         this.initializeComponent();
         return view;
@@ -103,7 +114,7 @@ public class ProfileInfomationFragment extends Fragment implements View.OnClickL
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!edtEmail.getText().toString().contains("@")) {
+                if (!validate(s.toString())) {
                     edtEmail.setError("Email is not valid");
                 } else {
                     edtEmail.setError(null);
@@ -173,6 +184,11 @@ public class ProfileInfomationFragment extends Fragment implements View.OnClickL
             }
         }
         return true;
+    }
+
+    public boolean validate(final String hex) {
+        matcher = pattern.matcher(hex);
+        return matcher.matches();
     }
 
 }

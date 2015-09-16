@@ -9,7 +9,7 @@ public class MainFragment extends AppCompatActivity {
     private HomeFragment homeFragment = new HomeFragment();
     private LoginFragment loginFragment = new LoginFragment();
     private SignupFragment signupFragment = new SignupFragment();
-    private ProfileInfomationFragment profileInfomationFragment = new ProfileInfomationFragment();
+    private ProfileInformationFragment profileInformationFragment = new ProfileInformationFragment();
     private ProfilePictureFragment profilePictureFragment = new ProfilePictureFragment();
 
     @Override
@@ -44,13 +44,13 @@ public class MainFragment extends AppCompatActivity {
     public void showProfileInfomationFragment() {
         this.getFragmentManager().beginTransaction()
                 .setCustomAnimations(R.anim.anim_in_right, R.anim.anim_out_left)
-                .replace(android.R.id.content, profileInfomationFragment).commit();
+                .replace(android.R.id.content, profileInformationFragment).commit();
     }
 
     public void showProfileInfomationFragmentBack() {
         this.getFragmentManager().beginTransaction()
                 .setCustomAnimations(R.anim.anim_in_left, R.anim.anim_out_right)
-                .replace(android.R.id.content, profileInfomationFragment).commit();
+                .replace(android.R.id.content, profileInformationFragment).commit();
     }
 
     public void showProfilePictureFragment() {
@@ -59,8 +59,8 @@ public class MainFragment extends AppCompatActivity {
                 .replace(android.R.id.content, profilePictureFragment).commit();
     }
 
-    public ProfileInfomationFragment getProfileInfomationFragment() {
-        return profileInfomationFragment;
+    public ProfileInformationFragment getProfileInfomationFragment() {
+        return profileInformationFragment;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class MainFragment extends AppCompatActivity {
         if (loginFragment.isVisible() || signupFragment.isVisible()) {
             this.showHomeFragment();
         } else {
-            if (profileInfomationFragment.isVisible()) {
+            if (profileInformationFragment.isVisible()) {
             } else {
                 if (profilePictureFragment.isVisible()) {
                     this.showProfileInfomationFragmentBack();

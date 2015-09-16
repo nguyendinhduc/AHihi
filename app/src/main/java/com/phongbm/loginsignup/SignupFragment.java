@@ -26,7 +26,6 @@ import com.parse.SignUpCallback;
 import com.phongbm.ahihi.R;
 import com.phongbm.common.CommonValue;
 import com.phongbm.common.GlobalApplication;
-import com.phongbm.libs.SquareImageView;
 
 public class SignupFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "SignupFragment";
@@ -43,7 +42,7 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_signup, container, false);
+        view = inflater.inflate(R.layout.fragment_signup, null);
         this.initializeToolbar();
         this.initializeComponent();
         return view;
@@ -200,9 +199,13 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
                         if (e == null) {
                             newUser.put("isOnline", true);
                             newUser.saveInBackground();
+
                             ((MainFragment) SignupFragment.this.getActivity())
                                     .showProfileInfomationFragment();
                             ((GlobalApplication)getActivity().getApplication()).addIdUser(newUser.getObjectId());
+                            GlobalApplication.startWaittingAHihi = true;
+                            GlobalApplication.checkLoginThisId = true;
+                            GlobalApplication.startActivityMessage = false;
                             progressDialog.dismiss();
                             Toast.makeText(SignupFragment.this.getActivity(),
                                     "Registered successfully", Toast.LENGTH_SHORT).show();

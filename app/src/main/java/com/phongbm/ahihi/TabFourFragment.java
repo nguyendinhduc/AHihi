@@ -14,18 +14,9 @@ public class TabFourFragment extends Fragment {
     private static final String TAG = "TabFourFragment";
     private View view;
 
-    public TabFourFragment(Context context, ViewGroup viewGroup) {
-        super();
+    public TabFourFragment(Context context) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        view = layoutInflater.inflate(R.layout.tab_four, viewGroup, false);
-    }
-
-    public static TabFourFragment newInstance(String address, Context context, ViewGroup viewGroup) {
-        TabFourFragment myFragment = new TabFourFragment(context, viewGroup);
-        Bundle args = new Bundle();
-        args.putString("address", address);
-        myFragment.setArguments(args);
-        return myFragment;
+        view = layoutInflater.inflate(R.layout.tab_four, null);
     }
 
     @Override

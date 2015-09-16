@@ -6,7 +6,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -19,14 +18,18 @@ import android.text.Spanned;
 import android.text.style.ImageSpan;
 import android.util.Pair;
 
+import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
+import com.phongbm.image.ImageActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class CommonMethod {
@@ -80,7 +83,12 @@ public class CommonMethod {
     }
 
     public String getCurrentDateTime() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss", Locale.US);
+        return simpleDateFormat.format(Calendar.getInstance().getTime());
+    }
+
+    public String getMessageDate() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
         return simpleDateFormat.format(Calendar.getInstance().getTime());
     }
 
@@ -90,9 +98,16 @@ public class CommonMethod {
         avatar.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
         byte[] bytes = byteArrayOutputStream.toByteArray();
         if (bytes != null) {
-            ParseFile parseFile = new ParseFile(bytes);
+            final ParseFile parseFile = new ParseFile(bytes);
             parseUser.put("avatar", parseFile);
-            parseUser.saveInBackground();
+            parseUser.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if ( e == null ) {
+                        GlobalApplication.linkAvatarSender = parseFile.getUrl();
+                    }
+                }
+            });
         }
         try {
             byteArrayOutputStream.close();
@@ -122,18 +137,7 @@ public class CommonMethod {
         return BitmapFactory.decodeFile(uri, options);
     }
 
-    public static Bitmap decodeSampledBitmapFromResource(Resources res, int idImage,
-                                                  int reqWidth, int reqHeight) {
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeResource(res, idImage, options);
-        options.inSampleSize = calculateInSampleSize(options, reqWidth,
-                reqHeight);
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeResource(res, idImage, options);
-    }
-
-    public static int calculateInSampleSize(BitmapFactory.Options options,
+    public int calculateInSampleSize(BitmapFactory.Options options,
                                      int reqWidth, int reqHeight) {
         final int height = options.outHeight;
         final int width = options.outWidth;
@@ -150,18 +154,18 @@ public class CommonMethod {
     }
 
     public Pair<Integer, Integer> getStandSizeBitmap(int width, int height,
-                                                     final int WITH_SENDER_IMAGE_MAX,
-                                                     final int HEIGHT_SEND_IMAGE_MAX) {
-        if (width < WITH_SENDER_IMAGE_MAX && height < HEIGHT_SEND_IMAGE_MAX) {
+                                                     final int WIDTH_IMAGE_MAX,
+                                                     final int HEIGHT_IMAGE_MAX) {
+        if (width < WIDTH_IMAGE_MAX && height < HEIGHT_IMAGE_MAX) {
             return null;
         }
-        if (width > WITH_SENDER_IMAGE_MAX) {
-            height = (int) ((float) (WITH_SENDER_IMAGE_MAX) / width * height);
-            width = WITH_SENDER_IMAGE_MAX;
+        if (width > WIDTH_IMAGE_MAX) {
+            height = (int) ((float) (WIDTH_IMAGE_MAX) / width * height);
+            width = WIDTH_IMAGE_MAX;
         }
-        if (height > HEIGHT_SEND_IMAGE_MAX) {
-            width = (int) ((float) (HEIGHT_SEND_IMAGE_MAX) / height * width);
-            height = HEIGHT_SEND_IMAGE_MAX;
+        if (height > HEIGHT_IMAGE_MAX) {
+            width = (int) ((float) (HEIGHT_IMAGE_MAX) / height * width);
+            height = HEIGHT_IMAGE_MAX;
         }
         return new Pair<>(width, height);
     }
@@ -199,6 +203,16 @@ public class CommonMethod {
         bitmap = Bitmap.createBitmap(bitmap, 0, 0,
                 bitmap.getWidth(), bitmap.getHeight(), matrix, true);
         return bitmap;
+    }
+
+    public int convertSizeIcon ( float density, int sizeDp ) {
+        return (int) (sizeDp * ( density / 160));
+    }
+
+    public void startActivitySetAvatar( Activity activity) {
+        Intent intentAccount = new Intent();
+        intentAccount.setClass(activity.getBaseContext(), ImageActivity.class);
+        activity.startActivityForResult(intentAccount, CommonValue.REQUECODE_SET_AVATAR);
     }
 
 }

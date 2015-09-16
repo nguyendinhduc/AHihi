@@ -5,14 +5,14 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.BitmapFactory;
 import android.os.Environment;
-import android.text.SpannableString;
 import android.util.Log;
 
 import com.phongbm.common.CommonValue;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,11 +26,11 @@ public class MessagesLogDBManager {
 
     private Context context;
     private SQLiteDatabase sqLiteDatabase;
-    private ArrayList<String> ids;
+    // private ArrayList<String> ids;
 
     public MessagesLogDBManager(Context context) {
         this.context = context;
-        ids = new ArrayList<String>();
+        // ids = new ArrayList<>();
         this.copyDatabaseFile();
     }
 
@@ -39,6 +39,7 @@ public class MessagesLogDBManager {
         File file = new File(DATA_PATH + DATA_NAME);
         if (file.exists()) {
             Log.i(TAG, "Exists");
+            openDatabase();
             return;
         }
         try {
@@ -87,24 +88,23 @@ public class MessagesLogDBManager {
         sqLiteDatabase.delete(DATA_NAME, "id=?", new String[]{id});
     }
 
-    public boolean CheckIsDataAlreadyInDBorNot(String dbfield, String fieldValue) {
+    public boolean conversationExist(String id) {
         this.openDatabase();
-//        String Query = "SELECT * FROM " + DATA_NAME + " WHERE " + dbfield + " = " + fieldValue;
-//        Cursor cursor = sqLiteDatabase.rawQuery(Query, null);
-        Cursor cursor = sqLiteDatabase.query(DATA_NAME, null, "id=?", new String[] {fieldValue}, null, null, null);
-        if(cursor.getCount() <= 0){
+        Cursor cursor = sqLiteDatabase.query(DATA_NAME, null, "id=?", new String[]{id}, null, null, null);
+        if (cursor.getCount() <= 0) {
             cursor.close();
             return false;
         }
         cursor.close();
         return true;
     }
+
     public ArrayList<MessagesLogItem> getData() {
         this.openDatabase();
         ArrayList<MessagesLogItem> messagesLogItems = new ArrayList<>();
-        int indexId, indexFullName, indexMessage, indexDate, indexAvatar;
-        String id, fullName, message, date;
-        byte[] byteAvatar;
+        int indexId, indexFullName, indexMessage, indexDate, indexIsRead, indexLinkAvatar;
+        String id, fullName, message, date, linkAvatar;
+        boolean isRead;
         Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM Messages", null);
         if (cursor == null)
             return null;
@@ -113,19 +113,18 @@ public class MessagesLogDBManager {
         indexFullName = cursor.getColumnIndex("fullName");
         indexMessage = cursor.getColumnIndex("message");
         indexDate = cursor.getColumnIndex("date");
-        indexAvatar = cursor.getColumnIndex("avatar");
+        indexIsRead = cursor.getColumnIndex("isRead");
+        indexLinkAvatar = cursor.getColumnIndex("linkAvatar");
+
         while (!cursor.isAfterLast()) {
             id = cursor.getString(indexId);
             fullName = cursor.getString(indexFullName);
             message = cursor.getString(indexMessage);
             date = cursor.getString(indexDate);
-            byteAvatar = cursor.getBlob(indexAvatar);
-            if ( byteAvatar == null || byteAvatar.length == 0 )
-                messagesLogItems.add(0, new MessagesLogItem(id, fullName, SpannableString.valueOf(message), date));
-            else
-                messagesLogItems.add( new MessagesLogItem(id, fullName, SpannableString.valueOf(message), date
-                        , BitmapFactory.decodeByteArray(byteAvatar, 0, byteAvatar.length)));
-            ids.add(id);
+            isRead = Boolean.parseBoolean(cursor.getString(indexIsRead));
+            linkAvatar = cursor.getString(indexLinkAvatar);
+            // ids.add(id);
+            messagesLogItems.add(new MessagesLogItem(id, fullName, message, date, isRead, linkAvatar));
             cursor.moveToNext();
         }
         cursor.close();
@@ -136,11 +135,11 @@ public class MessagesLogDBManager {
         sqLiteDatabase.execSQL("DELETE FROM Messages");
     }
 
-    public boolean checkMessagesLogExists(String id) {
+    /*public boolean checkMessagesLogExists(String id) {
         if (ids.indexOf(id) != -1) {
             return true;
         }
         return false;
-    }
+    }*/
 
 }

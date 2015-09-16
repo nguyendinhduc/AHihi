@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,10 +29,13 @@ import com.hudomju.swipe.SwipeToDismissTouchListener;
 import com.hudomju.swipe.adapter.ListViewAdapter;
 import com.phongbm.call.OutgoingCallActivity;
 import com.phongbm.common.CommonValue;
+import com.phongbm.common.GlobalApplication;
 import com.phongbm.common.OnShowPopupMenu;
 import com.phongbm.message.MessageActivity;
 
 import java.util.Collections;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 @SuppressLint("ValidFragment")
 public class TabFriendFragment extends Fragment implements View.OnClickListener, OnShowPopupMenu {
@@ -41,11 +46,13 @@ public class TabFriendFragment extends Fragment implements View.OnClickListener,
     private AllFriendAdapter allFriendAdapter;
     private ActiveFriendAdapter activeFriendAdapter;
     private TextView btnTabActive, btnTabAllFriends;
-    private Switch switchOnline;
     private BroadcastUpdateListFriend broadcastUpdateListFriend = new BroadcastUpdateListFriend();
     private boolean activeFriendAdapterVisible = true;
     private SwipeToDismissTouchListener<ListViewAdapter> touchListener;
     private Context context;
+    private CircleImageView imgAvatar;
+    private TextView txtFullName, txtStatus;
+    private Switch switchOnline;
 
     private Handler handler = new Handler() {
         @Override
@@ -61,19 +68,10 @@ public class TabFriendFragment extends Fragment implements View.OnClickListener,
         }
     };
 
-    public TabFriendFragment(Context context, ViewGroup viewGroup) {
-        super();
+    public TabFriendFragment(Context context) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        view = layoutInflater.inflate(R.layout.tab_friend, viewGroup, false);
+        view = layoutInflater.inflate(R.layout.tab_friend, null);
         this.initializeComponent();
-    }
-
-    public static TabFriendFragment newInstance(String address, Context context, ViewGroup viewGroup) {
-        TabFriendFragment myFragment = new TabFriendFragment(context, viewGroup);
-        Bundle args = new Bundle();
-        args.putString("address", address);
-        myFragment.setArguments(args);
-        return myFragment;
     }
 
     @Override
@@ -90,27 +88,17 @@ public class TabFriendFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        this.initializeProfile();
         return view;
     }
 
     private void initializeComponent() {
         listViewFriend = (ListView) view.findViewById(R.id.listViewFriend);
-        // listViewFriend.setOnItemClickListener(this);
+
         btnTabActive = (TextView) view.findViewById(R.id.btnTabActive);
         btnTabActive.setOnClickListener(this);
         btnTabAllFriends = (TextView) view.findViewById(R.id.btnTabAllFriends);
         btnTabAllFriends.setOnClickListener(this);
-        switchOnline = (Switch) view.findViewById(R.id.switchOnline);
-        switchOnline.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    Toast.makeText(context, "ON", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(context, "OFF", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
 
         touchListener = new SwipeToDismissTouchListener<>(new ListViewAdapter(listViewFriend),
                 new SwipeToDismissTouchListener.DismissCallbacks<ListViewAdapter>() {
@@ -133,17 +121,47 @@ public class TabFriendFragment extends Fragment implements View.OnClickListener,
                     touchListener.undoPendingDismiss();
                 } else {
                     String inComingId, inComingFullName;
+                    String urlAvatar;
                     if (activeFriendAdapterVisible) {
                         inComingId = activeFriendAdapter.getItem(position).getId();
                         inComingFullName = activeFriendAdapter.getItem(position).getFullName();
+                        urlAvatar = activeFriendAdapter.getItem(position).getUrlAvatar();
                     } else {
                         inComingId = allFriendAdapter.getItem(position).getId();
                         inComingFullName = allFriendAdapter.getItem(position).getFullName();
+                        urlAvatar = allFriendAdapter.getItem(position).getUrlAvatar();
                     }
+                    Log.i(TAG, "setOnItemClickListener_ urlAvatar: " + urlAvatar);
                     Intent intentChat = new Intent(context, MessageActivity.class);
                     intentChat.putExtra(CommonValue.INCOMING_CALL_ID, inComingId);
                     intentChat.putExtra(CommonValue.INCOMING_MESSAGE_FULL_NAME, inComingFullName);
+                    intentChat.putExtra(CommonValue.MESSAGE_LOG_LINK_AVATAR_RECEVER, urlAvatar);
+                    GlobalApplication.linkAvatarReceiver = urlAvatar;
                     context.startActivity(intentChat);
+                }
+            }
+        });
+    }
+
+    private void initializeProfile() {
+        imgAvatar = (CircleImageView) view.findViewById(R.id.imgAvatar);
+        imgAvatar.setImageBitmap(((GlobalApplication) this.getActivity().getApplication()).getAvatar());
+        txtFullName = (TextView) view.findViewById(R.id.txtFullName);
+        txtFullName.setText(((GlobalApplication) this.getActivity().getApplication()).getFullName());
+        txtStatus = (TextView) view.findViewById(R.id.txtStatus);
+        txtStatus.setText("ONLINE");
+        switchOnline = (Switch) view.findViewById(R.id.switchOnline);
+        switchOnline.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    txtStatus.setText("ONLINE");
+                    txtStatus.setTextColor(ContextCompat.getColor(context, R.color.green_500));
+                    listViewFriend.setAdapter(activeFriendAdapter);
+                } else {
+                    txtStatus.setText("OFFLINE");
+                    txtStatus.setTextColor(Color.GRAY);
+                    listViewFriend.setAdapter(null);
                 }
             }
         });
@@ -155,23 +173,6 @@ public class TabFriendFragment extends Fragment implements View.OnClickListener,
         this.getActivity().registerReceiver(broadcastUpdateListFriend, filter);
     }
 
-
-    /*@Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String inComingId, inComingFullName;
-        if (activeFriendAdapterVisible) {
-            inComingId = activeFriendAdapter.getItem(position).getId();
-            inComingFullName = activeFriendAdapter.getItem(position).getFullName();
-        } else {
-            inComingId = allFriendAdapter.getItem(position).getId();
-            inComingFullName = allFriendAdapter.getItem(position).getFullName();
-        }
-        Intent intentChat = new Intent(this.getActivity(), MessageActivity.class);
-        intentChat.putExtra(CommonValue.INCOMING_CALL_ID, inComingId);
-        intentChat.putExtra(CommonValue.INCOMING_MESSAGE_FULL_NAME, inComingFullName);
-        this.getActivity().startActivity(intentChat);
-    }
-*/
     @Override
     public void onClick(View view) {
         switch (view.getId()) {

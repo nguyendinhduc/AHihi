@@ -11,7 +11,7 @@ public class RingtoneManager {
 
     public RingtoneManager(Context context) {
         this.context = context;
-        mediaPlayer = MediaPlayer.create(context, R.raw.ringtone);
+        mediaPlayer = MediaPlayer.create(context, R.raw.bphone);
     }
 
     public void playRingtone() {

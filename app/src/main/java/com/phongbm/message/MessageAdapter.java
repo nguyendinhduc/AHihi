@@ -1,6 +1,7 @@
 package com.phongbm.message;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
@@ -11,12 +12,18 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,9 +34,11 @@ import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 import com.parse.ProgressCallback;
 import com.phongbm.ahihi.R;
 import com.phongbm.common.GlobalApplication;
+import com.phongbm.common.OnLoadedAvatar;
 import com.phongbm.libs.SquareImageView;
 import com.phongbm.libs.TriangleShapeView;
 
@@ -58,12 +67,48 @@ public class MessageAdapter extends BaseAdapter implements View.OnClickListener 
     private ArrayList<MessageItem> messageItems;
     private LayoutInflater layoutInflater;
     private Bitmap outGoingMessageAvatar, inComingMessageAvatar;
+    private OnLoadedAvatar onLoadedAvatar;
 
-    public MessageAdapter(Context context, String inComingMessageId) {
+    public void setOnLoadedAvatar(OnLoadedAvatar onLoadedAvatar) {
+        this.onLoadedAvatar = onLoadedAvatar;
+    }
+
+    public MessageAdapter(Context context, final String inComingMessageId) {
         layoutInflater = LayoutInflater.from(context);
         this.messageItems = new ArrayList<>();
         globalApplication = (GlobalApplication) context.getApplicationContext();
         outGoingMessageAvatar = globalApplication.getAvatar();
+
+        final ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.setMessage("Loading...");
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.show();
+
+        ParseQuery<ParseUser> query = ParseUser.getQuery();
+        query.getInBackground(inComingMessageId, new GetCallback<ParseUser>() {
+            @Override
+            public void done(ParseUser parseUser, ParseException e) {
+                if (e != null) {
+                    e.printStackTrace();
+                    return;
+                }
+                ParseFile parseFile = (ParseFile) parseUser.get("avatar");
+                if (parseFile != null) {
+                    parseFile.getDataInBackground(new GetDataCallback() {
+                        @Override
+                        public void done(byte[] bytes, ParseException e) {
+                            if (e != null) {
+                                e.printStackTrace();
+                                return;
+                            }
+                            inComingMessageAvatar = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                            onLoadedAvatar.onLoaded(true);
+                            progressDialog.dismiss();
+                        }
+                    });
+                }
+            }
+        });
     }
 
     @Override
@@ -112,6 +157,7 @@ public class MessageAdapter extends BaseAdapter implements View.OnClickListener 
             viewHolder.txtMessage = (TextView) convertView.findViewById(R.id.txtMessage);
             viewHolder.layoutPicture = (LinearLayout) convertView.findViewById(R.id.layoutPicture);
             viewHolder.imgPicture = (SquareImageView) convertView.findViewById(R.id.imgPicture);
+            viewHolder.txtDate = (TextView) convertView.findViewById(R.id.txtDate);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -123,17 +169,19 @@ public class MessageAdapter extends BaseAdapter implements View.OnClickListener 
                 viewHolder.imgTriangel.setBackgroundColor(Color.parseColor("#4caf50"));
                 break;
             case TYPE_INCOMING:
-                viewHolder.imgAvatar.setImageResource(R.drawable.ic_ava_2);
+                viewHolder.imgAvatar.setImageBitmap(inComingMessageAvatar);
                 viewHolder.imgTriangel.setBackgroundColor(Color.parseColor("#eeeeee"));
                 break;
         }
         if (position == 0 && messageItems.get(0).getMode() == TYPE_EMOTICON) {
             viewHolder.imgTriangel.setBackgroundColor(Color.parseColor("#00000000"));
         }
-        if (position > 0 && (type == TYPE_OUTGOING && typePre == TYPE_OUTGOING)
-                || (type == TYPE_INCOMING && typePre == TYPE_INCOMING)) {
-            viewHolder.imgAvatar.setImageResource(R.drawable.ic_transparent);
-            viewHolder.imgTriangel.setBackgroundColor(Color.parseColor("#00000000"));
+        if (position > 0) {
+            if ((type == TYPE_OUTGOING && typePre == TYPE_OUTGOING)
+                    || (type == TYPE_INCOMING && typePre == TYPE_INCOMING)) {
+                viewHolder.imgAvatar.setImageResource(R.drawable.ic_transparent);
+                viewHolder.imgTriangel.setBackgroundColor(Color.parseColor("#00000000"));
+            }
         }
         if ((type == TYPE_OUTGOING && typePre == TYPE_INCOMING)
                 || (type == TYPE_INCOMING && typePre == TYPE_OUTGOING)) {
@@ -146,42 +194,56 @@ public class MessageAdapter extends BaseAdapter implements View.OnClickListener 
         }
 
         switch (messageItems.get(position).getMode()) {
-            case 0:
-            case 1:
+            case TYPE_TEXT:
+            case TYPE_EMOTICON:
                 viewHolder.txtMessage.setText(messageItems.get(position).getContent());
                 viewHolder.txtMessage.setOnClickListener(null);
-                viewHolder.txtMessage.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                 viewHolder.txtMessage.setVisibility(View.VISIBLE);
                 viewHolder.layoutPicture.setVisibility(View.GONE);
                 break;
-            case 2:
+            case TYPE_FILE:
+                viewHolder.txtMessage.setVisibility(View.VISIBLE);
+                viewHolder.layoutPicture.setVisibility(View.GONE);
                 viewHolder.txtMessage.setOnClickListener(this);
+
                 String content = messageItems.get(position).getContent().toString();
                 String objectId = content.substring(0, content.lastIndexOf("/"));
-                String fileName = content.substring(content.lastIndexOf("/") + 1);
-                viewHolder.txtMessage.setText(Html.fromHtml(
-                        "<u><font color='#827ca3'>" + fileName + "</font></u>   "));
-                viewHolder.txtMessage.setCompoundDrawablesWithIntrinsicBounds(0, 0,
-                        R.drawable.ic_message_download, 0);
+                String fileName = content.substring(content.lastIndexOf("/") + 1) + "\t\t\t\t.";
+
+                SpannableStringBuilder spannableStringBuilder =
+                        new SpannableStringBuilder(Html.fromHtml(
+                                "<u><font color='#f44336'><b>" + fileName + "</b></font></u>"));
+                Drawable download = ContextCompat.getDrawable(parent.getContext(),
+                        R.drawable.ic_message_download);
+                download.setBounds(0, 0, download.getIntrinsicWidth() / 2, download.getIntrinsicHeight() / 2);
+                ImageSpan imageSpan = new ImageSpan(download, ImageSpan.ALIGN_BASELINE);
+                spannableStringBuilder.setSpan(imageSpan, spannableStringBuilder.length() - 1,
+                        spannableStringBuilder.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                viewHolder.txtMessage.setText(spannableStringBuilder, TextView.BufferType.SPANNABLE);
+
                 viewHolder.txtMessage.setTag(objectId);
-                viewHolder.txtMessage.setVisibility(View.VISIBLE);
-                viewHolder.layoutPicture.setVisibility(View.GONE);
                 break;
-            case 3:
+            case TYPE_PICTURE:
                 viewHolder.txtMessage.setVisibility(View.GONE);
                 viewHolder.layoutPicture.setVisibility(View.VISIBLE);
-//                if (messageItems.get(position).getPicture() != null) {
-//                    Drawable drawable = viewHolder.imgPicture.getDrawable();
-//                    if (drawable != null && drawable instanceof AsyncDrawable) {
-//                        PictureAsyncTask pictureAsyncTask = ((AsyncDrawable) drawable).getLoadImageMessage();
-//                        if (pictureAsyncTask != null) pictureAsyncTask.cancel(true);
-//                    }
-//                    viewHolder.imgPicture.setImageBitmap(messageItems.get(position).getPicture());
-//                } else {
-                    this.loadPicture(position,
-                            messageItems.get(position).getContent() == null ? " " : messageItems.get(position).getContent().toString(),
+                viewHolder.imgPicture.setOnClickListener(this);
+
+                if (messageItems.get(position).getPicture() != null) {
+                    Drawable drawable = viewHolder.imgPicture.getDrawable();
+                    if (drawable != null && drawable instanceof AsyncDrawable) {
+                        PictureAsyncTask pictureAsyncTask = ((AsyncDrawable) drawable).getLoadImageMessage();
+                        if (pictureAsyncTask != null) {
+                            pictureAsyncTask.cancel(true);
+                        }
+                    }
+                    viewHolder.imgPicture.setImageBitmap(messageItems.get(position).getPicture());
+                } else {
+                    this.loadPicture(position, messageItems.get(position).getContent().toString(),
                             viewHolder.imgPicture);
-//                }
+                }
+
+                viewHolder.imgPicture.setTag(messageItems.get(position).getContent());
+                Log.i(TAG, "setTag...");
                 break;
         }
 
@@ -197,98 +259,140 @@ public class MessageAdapter extends BaseAdapter implements View.OnClickListener 
                     break;
             }
         }
+
+        viewHolder.txtDate.setText(messageItems.get(position).getDate());
+        if (position == messageItems.size() - 1) {
+            viewHolder.txtDate.setVisibility(View.VISIBLE);
+        } else {
+            if (getItemViewType(position) == TYPE_OUTGOING
+                    && getItemViewType(position + 1) == TYPE_INCOMING
+                    || getItemViewType(position) == TYPE_INCOMING
+                    && getItemViewType(position + 1) == TYPE_OUTGOING) {
+                viewHolder.txtDate.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.txtDate.setVisibility(View.GONE);
+            }
+        }
+
         return convertView;
     }
 
     @Override
     public void onClick(final View view) {
-        final AlertDialog alertDialog = new AlertDialog.Builder(view.getContext()).create();
-        alertDialog.setTitle("Confirm");
-        alertDialog.setMessage("Download");
-        alertDialog.setCanceledOnTouchOutside(false);
-        alertDialog.setCancelable(false);
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        alertDialog.dismiss();
-                    }
-                });
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "DOWNLOAD",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String objectId = view.getTag().toString();
-                        ParseQuery<ParseObject> query = ParseQuery.getQuery("Message");
-                        query.getInBackground(objectId, new GetCallback<ParseObject>() {
+        int type = -1;
+        if (view instanceof TextView) {
+            type = TYPE_FILE;
+        } else {
+            if (view instanceof ImageView) {
+                type = TYPE_PICTURE;
+            }
+        }
+        switch (type) {
+            case TYPE_FILE:
+                final AlertDialog alertDialog = new AlertDialog.Builder(view.getContext()).create();
+                alertDialog.setTitle("Confirm");
+                alertDialog.setMessage("Download");
+                alertDialog.setCanceledOnTouchOutside(false);
+                alertDialog.setCancelable(false);
+                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL",
+                        new DialogInterface.OnClickListener() {
                             @Override
-                            public void done(ParseObject parseObject, ParseException e) {
-                                if (e != null) {
-                                    return;
-                                }
-                                final ParseFile parseFile = parseObject.getParseFile("file");
-                                Log.i(TAG, parseFile.getName());
-                                Log.i(TAG, parseFile.getUrl());
-                                String fileName = parseFile.getName().substring(
-                                        parseFile.getName().lastIndexOf("-") + 1);
-                                Log.i(TAG, fileName);
-                                final String path = Environment.getExternalStorageDirectory().getPath() +
-                                        "/" + Environment.DIRECTORY_DOWNLOADS + "/" + fileName;
-                                Log.i(TAG, path);
-                                parseFile.getDataInBackground(new GetDataCallback() {
-                                    @Override
-                                    public void done(byte[] bytes, ParseException e) {
-                                        if (e != null) {
-                                            Toast.makeText(view.getContext(), "Download fail: "
-                                                    + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                            return;
-                                        }
-                                        File file = new File(path);
-                                        Log.i(TAG, "new File");
-                                        boolean checkCreateFile = false;
-                                        int i = 1;
-                                        while (!checkCreateFile) {
-                                            if (!file.exists()) try {
-                                                Log.i(TAG, "!file.exists()");
-                                                file.createNewFile();
-                                                checkCreateFile = true;
-                                                FileOutputStream outputStream = new FileOutputStream(file);
-                                                outputStream.write(bytes);
-                                                outputStream.close();
-                                                Toast.makeText(view.getContext(), "Download successfully",
-                                                        Toast.LENGTH_SHORT).show();
-                                            } catch (IOException iOE) {
-                                                iOE.printStackTrace();
-                                            }
-                                            else {
-                                                int index = path.lastIndexOf(".");
-                                                String newPath = path.replace(path.substring(index,
-                                                        index + 1), "(" + i + ").");
-                                                file = new File(newPath);
-                                                i++;
-                                            }
-                                        }
-                                    }
-                                }, new ProgressCallback() {
-                                    @Override
-                                    public void done(Integer progress) {
-                                        Log.i(TAG, "percent: " + progress);
-                                        // if (progress > 50) parseFile.cancel();
-                                    }
-                                });
+                            public void onClick(DialogInterface dialog, int which) {
+                                alertDialog.dismiss();
                             }
                         });
-                        alertDialog.dismiss();
-                    }
-                });
-        alertDialog.show();
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "DOWNLOAD",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String objectId = view.getTag().toString();
+                                ParseQuery<ParseObject> query = ParseQuery.getQuery("Message");
+                                query.getInBackground(objectId, new GetCallback<ParseObject>() {
+                                    @Override
+                                    public void done(ParseObject parseObject, ParseException e) {
+                                        if (e != null) {
+                                            return;
+                                        }
+                                        final ParseFile parseFile = parseObject.getParseFile("file");
+                                        String fileName = parseFile.getName().substring(
+                                                parseFile.getName().lastIndexOf("-") + 1);
+                                        final String path = Environment.getExternalStorageDirectory().getPath() +
+                                                "/" + Environment.DIRECTORY_DOWNLOADS + "/" + fileName;
+                                        parseFile.getDataInBackground(new GetDataCallback() {
+                                            @Override
+                                            public void done(byte[] bytes, ParseException e) {
+                                                if (e != null) {
+                                                    Toast.makeText(view.getContext(), "Download fail: "
+                                                            + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                    return;
+                                                }
+                                                File file = new File(path);
+                                                Log.i(TAG, "new File");
+                                                boolean checkCreateFile = false;
+                                                int i = 1;
+                                                while (!checkCreateFile) {
+                                                    if (!file.exists()) try {
+                                                        Log.i(TAG, "!file.exists()");
+                                                        file.createNewFile();
+                                                        checkCreateFile = true;
+                                                        FileOutputStream outputStream = new FileOutputStream(file);
+                                                        outputStream.write(bytes);
+                                                        outputStream.close();
+                                                        Toast.makeText(view.getContext(), "Download successfully",
+                                                                Toast.LENGTH_SHORT).show();
+                                                    } catch (IOException iOE) {
+                                                        iOE.printStackTrace();
+                                                    }
+                                                    else {
+                                                        int index = path.lastIndexOf(".");
+                                                        String newPath = path.replace(path.substring(index,
+                                                                index + 1), "(" + i + ").");
+                                                        file = new File(newPath);
+                                                        i++;
+                                                    }
+                                                }
+                                            }
+                                        }, new ProgressCallback() {
+                                            @Override
+                                            public void done(Integer progress) {
+                                                Log.i(TAG, "percent: " + progress);
+                                                // if (progress > 50) parseFile.cancel();
+                                            }
+                                        });
+                                    }
+                                });
+                                alertDialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+                break;
+            case TYPE_PICTURE:
+                if (view == null) {
+                    Log.i(TAG, "View NULL");
+                    return;
+                }
+                SpannableString spannableString = (SpannableString) view.getTag();
+                if (spannableString == null) {
+                    Log.i(TAG, "NULL SpannableString");
+                    return;
+                }
+                String url = ((SpannableString) view.getTag()).toString();
+                Log.i(TAG, url);
+                if (url != null) {
+                    PictureActivity.launch((MessageActivity) view.getContext(),
+                            view.findViewById(R.id.imgPicture), url);
+                } else {
+                    Log.i(TAG, "NULL");
+                }
+                break;
+        }
     }
 
     private class ViewHolder {
         View space;
         TriangleShapeView imgTriangel;
         CircleImageView imgAvatar;
-        TextView txtMessage;
+        TextView txtMessage, txtDate;
         LinearLayout layoutPicture;
         SquareImageView imgPicture;
     }
@@ -310,6 +414,7 @@ public class MessageAdapter extends BaseAdapter implements View.OnClickListener 
             if (messageItems.get(position).getPicture() == null) {
                 pictureAsyncTask.execute();
             }
+
         }
     }
 

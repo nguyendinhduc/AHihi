@@ -2,12 +2,11 @@ package com.phongbm.image;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -31,7 +30,6 @@ public class ImageActivity extends AppCompatActivity implements AdapterView.OnIt
 
         imageAdapter = new ImageAdapter(this);
         gridViewImage.setAdapter(imageAdapter);
-
     }
 
     private void initializeToolbar() {
@@ -43,12 +41,11 @@ public class ImageActivity extends AppCompatActivity implements AdapterView.OnIt
     private void initializeComponent() {
         gridViewImage = (GridView) findViewById(R.id.gridViewImage);
         gridViewImage.setOnItemClickListener(this);
-
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String url = (String)parent.getItemAtPosition(position);
+        String url = (String) parent.getItemAtPosition(position);
         if (!checkMinimumSize(url)) {
             Toast.makeText(this, "Picture too small", Toast.LENGTH_SHORT).show();
             return;
@@ -72,24 +69,12 @@ public class ImageActivity extends AppCompatActivity implements AdapterView.OnIt
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if ( requestCode == CommonValue.REQUECODE_SET_AVATAR ) {
-            if ( resultCode == Activity.RESULT_OK)
-                setResult(Activity.RESULT_OK, data);
-            else setResult(Activity.RESULT_CANCELED);
+    protected void onActivityResult(int requestCode, int resultCode, Intent result) {
+        if (requestCode == CommonValue.REQUECODE_SET_AVATAR && resultCode == Activity.RESULT_OK) {
+            setResult(Activity.RESULT_OK, result);
+            Log.i(TAG, "onActivityResult");
             finish();
         }
-        super.onActivityResult(requestCode, resultCode, data);
     }
+
 }

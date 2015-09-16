@@ -1,32 +1,39 @@
 package com.phongbm.message;
 
-import android.graphics.Bitmap;
-import android.text.SpannableString;
-
 public class MessagesLogItem {
-    private String id, fullName, date;
-    private SpannableString message;
-    private Bitmap avatar = null;
+    private String id, fullName, message, date, linkAvatar;
+    private boolean isRead;
 
-    public MessagesLogItem(String id, String fullName, SpannableString message, String date) {
+    public MessagesLogItem(String id, String fullName, String message, String date, boolean isRead) {
         this.id = id;
         this.fullName = fullName;
         this.message = message;
         this.date = date;
+        this.isRead = isRead;
     }
-    public MessagesLogItem(String id, String fullName, SpannableString message, String date, Bitmap avatar) {
+
+    public MessagesLogItem(String id, String fullName, String message, String date, boolean isRead, String linkAvatar) {
         this.id = id;
         this.fullName = fullName;
         this.message = message;
         this.date = date;
-        this.avatar = avatar;
+        this.isRead = isRead;
+        this.linkAvatar = linkAvatar;
     }
 
-    public SpannableString getMessage() {
+    public String getLinkAvatar() {
+        return linkAvatar;
+    }
+
+    public void setLinkAvatar(String linkAvatar) {
+        this.linkAvatar = linkAvatar;
+    }
+
+    public String getMessage() {
         return message;
     }
 
-    public void setMessage(SpannableString message) {
+    public void setMessage(String message) {
         this.message = message;
     }
 
@@ -54,11 +61,19 @@ public class MessagesLogItem {
         this.date = date;
     }
 
-    public Bitmap getAvatar() {
-        return avatar;
+    public boolean isRead() {
+        return isRead;
     }
 
-    public void setAvatar(Bitmap avatar) {
-        this.avatar = avatar;
+    public void setIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) return false;
+        if (o instanceof MessagesLogItem)
+            return ((MessagesLogItem) o).id.equals(id);
+        else return false;
     }
 }
