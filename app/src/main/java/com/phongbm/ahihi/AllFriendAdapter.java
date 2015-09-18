@@ -19,8 +19,12 @@ import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.phongbm.common.CommonMethod;
 import com.phongbm.common.CommonValue;
+import com.phongbm.common.GlobalApplication;
 import com.phongbm.common.OnShowPopupMenu;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,30 +65,43 @@ public class AllFriendAdapter extends BaseAdapter {
                     if (parseFile == null) {
                         return;
                     }
-                    parseFile.getDataInBackground(new GetDataCallback() {
-                        @Override
-                        public void done(byte[] bytes, ParseException e) {
-                            if (e != null) {
-                                return;
-                            }
-                            Bitmap avatar = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                            AllFriendItem allFriendItem = new AllFriendItem(parseUser.getObjectId(), avatar,
-                                    parseUser.getUsername(), parseUser.getString("fullName"));
+//                    parseFile.getDataInBackground(new GetDataCallback() {
+//                        @Override
+//                        public void done(byte[] bytes, ParseException e) {
+//                            if (e != null) {
+//                                return;
+//                            }
+//                            Bitmap avatar = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+//                            AllFriendItem allFriendItem = new AllFriendItem(parseUser.getObjectId(), avatar,
+//                                    parseUser.getUsername(), parseUser.getString("fullName"));
+//
+//                            String urlAvatar = parseFile.getUrl();
+//                            allFriendItem.setUrlAvatar(urlAvatar);
+//                            allFriendItems.add(allFriendItem);
+//
+//                            Collections.sort(allFriendItems);
+//
+//                            if (parseUser.getBoolean("isOnline")) {
+//                                ActiveFriendItem activeFriendItem = new ActiveFriendItem(parseUser.getObjectId(),
+//                                        avatar, parseUser.getUsername(), parseUser.getString("fullName"));
+//                                activeFriendItem.setUrlAvatar(urlAvatar);
+//                                activeFriendItems.add(activeFriendItem);
+//                            }
+//                        }
+//                    });
+                    String urlAvatar = parseFile.getUrl();
+                    AllFriendItem allFriendItem = new AllFriendItem(parseUser.getObjectId(), urlAvatar,
+                            parseUser.getUsername(), parseUser.getString("fullName"));
+                    allFriendItems.add(allFriendItem);
 
-                            String urlAvatar = parseFile.getUrl();
-                            allFriendItem.setUrlAvatar(urlAvatar);
-                            allFriendItems.add(allFriendItem);
+                    Collections.sort(allFriendItems);
 
-                            Collections.sort(allFriendItems);
-
-                            if (parseUser.getBoolean("isOnline")) {
-                                ActiveFriendItem activeFriendItem = new ActiveFriendItem(parseUser.getObjectId(),
-                                        avatar, parseUser.getUsername(), parseUser.getString("fullName"));
-                                activeFriendItem.setUrlAvatar(urlAvatar);
-                                activeFriendItems.add(activeFriendItem);
-                            }
-                        }
-                    });
+                    if (parseUser.getBoolean("isOnline")) {
+                        ActiveFriendItem activeFriendItem = new ActiveFriendItem(parseUser.getObjectId(),
+                                urlAvatar, parseUser.getUsername(), parseUser.getString("fullName"));
+                        activeFriendItem.setUrlAvatar(urlAvatar);
+                        activeFriendItems.add(activeFriendItem);
+                    }
                     Message message = new Message();
                     message.what = CommonValue.ACTION_UPDATE_LIST_FRIEND;
                     message.setTarget(handler);
@@ -122,7 +139,14 @@ public class AllFriendAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        viewHolder.imgAvatar.setImageBitmap(allFriendItems.get(position).getAvatar());
+//        viewHolder.imgAvatar.setImageBitmap(allFriendItems.get(position).getAvatar());
+        Picasso.with(parent.getContext()).load(allFriendItems.get(position).getUrlAvatar())
+                .resize(CommonMethod.getInstance().convertSizeIcon(GlobalApplication.DENSITY_DPI, 48),
+                        CommonMethod.getInstance().convertSizeIcon(GlobalApplication.DENSITY_DPI, 48))
+                .placeholder(R.drawable.loading_picture)
+                .error(R.drawable.ic_launcher_ahihi)
+                .centerCrop()
+                .into(viewHolder.imgAvatar);
         viewHolder.txtName.setText(allFriendItems.get(position).getFullName());
         viewHolder.menu.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -14,4 +14,5 @@
     <string name="close_navigation_drawer">CLOSE</string>
     <string name="already_user">Already a user? <b>LOGIN</b></string>
     <string name="new_user">New user? <b>REGISTER</b></string>
+    <string name="confirmEmail"><u>Confirm Email</u>.</string>
 </resources>

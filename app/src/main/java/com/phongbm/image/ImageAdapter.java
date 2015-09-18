@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +19,9 @@ import android.widget.ImageView;
 
 import com.phongbm.ahihi.R;
 import com.phongbm.common.CommonMethod;
+import com.phongbm.common.GlobalApplication;
 import com.phongbm.libs.SquareImageView;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -31,6 +34,7 @@ public class ImageAdapter extends BaseAdapter {
     private ArrayList<String> imageURLs;
     volatile private ArrayList<ImageState> imageStates;
     private LayoutInflater layoutInflater;
+    private final int SIZE_IMAGE;
 
     public ImageAdapter(Context context) {
         this.context = context;
@@ -39,6 +43,10 @@ public class ImageAdapter extends BaseAdapter {
         for (String i : imageURLs) {
             Log.i(TAG, "uri: " + i);
         }
+
+        SIZE_IMAGE = (GlobalApplication.WIDTH_SCREEN - CommonMethod.getInstance().
+                convertSizeIcon(GlobalApplication.DENSITY_DPI, 4) * 4)/ 3;
+
         initializeListImageState();
     }
 
@@ -79,8 +87,8 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        SquareImageView imgImage;
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        final SquareImageView imgImage;
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.item_image, parent, false);
             imgImage = (SquareImageView) convertView.findViewById(R.id.imgImage);
@@ -91,7 +99,7 @@ public class ImageAdapter extends BaseAdapter {
         // loadBitmap(position, imageURLs.get(position), imgImage);
         Picasso.with(parent.getContext())
                 .load(new File(imageURLs.get(position)))
-                .resize(300, 300)
+                .resize(SIZE_IMAGE, SIZE_IMAGE)
                 .placeholder(R.drawable.loading_picture)
                 .error(R.drawable.ic_launcher_ahihi)
                 .centerCrop()

@@ -31,7 +31,7 @@ public class GlobalApplication extends Application {
         super.onCreate();
         Parse.enableLocalDatastore(this);
         Parse.initialize(this, ServerInfo.PARSE_APPLICATION_ID, ServerInfo.PARSE_CLIENT_KEY);
-        ParseUser.enableAutomaticUser();
+//        ParseUser.enableAutomaticUser();
         this.initializeComponent();
         sharedpreferenceAcount = new SharedpreferenceAccount(this);
         idUsers = sharedpreferenceAcount.readListID();

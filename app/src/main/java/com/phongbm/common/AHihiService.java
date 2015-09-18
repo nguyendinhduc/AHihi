@@ -260,6 +260,8 @@ public class AHihiService extends Service implements SinchClientListener,
                 intentSent.putExtra(CommonValue.AHIHI_KEY_DATE, message.getHeaders().get("date"));
                 intentSent.putExtra(CommonValue.AHIHI_KEY, key);
                 intentSent.putExtra(CommonValue.MESSAGE_CONTENT, content);
+                intentSent.putExtra(CommonValue.MESSAGE_TIME, message.getTimestamp().getTime());
+
                 AHihiService.this.sendBroadcast(intentSent);
             }
             String id = message.getSenderId();
@@ -356,6 +358,7 @@ public class AHihiService extends Service implements SinchClientListener,
                 intentSent.putExtra(CommonValue.AHIHI_KEY_DATE, date);
                 intentSent.putExtra(CommonValue.AHIHI_KEY, key);
                 intentSent.putExtra(CommonValue.MESSAGE_CONTENT, content);
+                intentSent.putExtra(CommonValue.MESSAGE_TIME, message.getTimestamp().getTime());
                 AHihiService.this.sendBroadcast(intentSent);
 //                if (!content.contains(CommonValue.AHIHI_KEY)) {
 //                    intentSent.putExtra(CommonValue.MESSAGE_CONTENT, content);
@@ -434,6 +437,7 @@ public class AHihiService extends Service implements SinchClientListener,
     }
 
     private void registerBroadcast() {
+       Log.i(TAG, "AAAAAAAAAA: " + ((GlobalApplication) getApplication()).getIdUers().get(0));
         if (aHihiBroadcast == null) {
             aHihiBroadcast = new AHihiBroadcast();
             IntentFilter intentFilter = new IntentFilter();

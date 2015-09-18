@@ -42,6 +42,7 @@ public class CommonValue {
     public static final String INCOMING_MESSAGE_ID = "INCOMING_MESSAGE_ID";
     public static final String ACTION_SEND_MESSAGE = "ACTION_SEND_MESSAGE";
     public static final String MESSAGE_CONTENT = "MESSAGE_CONTENT";
+    public static final String MESSAGE_TIME = "MESSAGE_TIME";
     public static final String STATE_MESSAGE_SENT = "STATE_MESSAGE_SENT";
     public static final String STATE_MESSAGE_INCOMING = "STATE_MESSAGE_INCOMING";
 

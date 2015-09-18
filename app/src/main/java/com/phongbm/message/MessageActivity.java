@@ -82,15 +82,16 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
     private Uri capturedImageURI;
     private Sound sound;
 
+    private long timeGetDataMessage = -1;
+
     private String linkAvatarReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        GlobalApplication.startActivityMessage = true;
+//        GlobalApplication.startActivityMessage = true;
         this.setContentView(R.layout.activity_message);
         sound = new Sound(this, 10);
-
         commonMethod = CommonMethod.getInstance();
 
         Intent intent = this.getIntent();
@@ -101,7 +102,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
 
         this.initializeToolbar();
         this.initializeComponent();
-        this.registerBroadcastMessage();
+
 
         messageAdapter = new MessageAdapter(this, inComingMessageId);
         messageAdapter.setOnLoadedAvatar(new OnLoadedAvatar() {
@@ -111,6 +112,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                 MessageActivity.this.getData();
             }
         });
+        this.registerBroadcastMessage();
         GlobalApplication.startActivityMessage = true;
     }
 
@@ -259,6 +261,9 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
             public void done(List<ParseObject> list, ParseException e) {
                 if (e != null) {
                     return;
+                }
+                if ( list.size() > 0 ) {
+                    timeGetDataMessage = list.get(0).getCreatedAt().getTime();
                 }
                 for (ParseObject message : list) {
                     reentrantLock.lock();
@@ -459,6 +464,11 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case CommonValue.STATE_MESSAGE_SENT:
+                    Log.i(TAG, "time message: " + intent.getLongExtra(CommonValue.MESSAGE_TIME, -1));
+                    Log.i(TAG, "time old message: " + timeGetDataMessage);
+                    if ( intent.getLongExtra(CommonValue.MESSAGE_TIME, -1) <= timeGetDataMessage) {
+                        return;
+                    }
                     sound.playMessageSent();
 
                     String key = intent.getStringExtra(CommonValue.AHIHI_KEY);
