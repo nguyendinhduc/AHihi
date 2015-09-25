@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +30,7 @@ public class CallLogAdapter extends BaseAdapter {
         this.context = context;
         layoutInflater = LayoutInflater.from(context);
         this.callLogItems = callLogItems;
-        this.colors = new ArrayList<Integer>();
+        this.colors = new ArrayList<>();
         for (int i = 0; i < callLogItems.size(); i++) {
             colors.add(-1);
         }
@@ -101,9 +100,6 @@ public class CallLogAdapter extends BaseAdapter {
                 colors.add(-1);
             }
         });
-
-        Log.i("CallLogAdapter", colors.size() + "");
-
         return convertView;
     }
 

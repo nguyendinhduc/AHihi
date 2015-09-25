@@ -8,11 +8,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -20,7 +22,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,18 +32,20 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.phongbm.ahihi.DetailActivity;
 import com.phongbm.ahihi.R;
 import com.phongbm.call.OutgoingCallActivity;
 import com.phongbm.common.CommonMethod;
 import com.phongbm.common.CommonValue;
 import com.phongbm.common.GlobalApplication;
-import com.phongbm.common.OnLoadedAvatar;
+import com.phongbm.common.OnLoadedInformation;
 import com.phongbm.music.Sound;
 
 import java.text.SimpleDateFormat;
@@ -68,7 +71,8 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
     private String outGoingMessageId, inComingMessageId;
     private ReentrantLock reentrantLock = new ReentrantLock();
     private EditText edtContent;
-    private ImageView btnAttach, btnSend, imgEmoticon, btnPicture, btnCamera;
+    private TextView txtStatus;
+    private ImageView btnAttach, btnSend, imgEmoticon, btnPicture, btnCamera, btnMap;
     private BroadcastMessage broadcastMessage;
     private String inComingFullName, content;
     private CommonMethod commonMethod;
@@ -81,47 +85,43 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
     private CollectionEmoticonAdapter collectionEmoticonAdapter;
     private Uri capturedImageURI;
     private Sound sound;
-
-    private long timeGetDataMessage = -1;
-
-    private String linkAvatarReceiver;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        GlobalApplication.startActivityMessage = true;
         this.setContentView(R.layout.activity_message);
+        GlobalApplication.startActivityMessage = true;
+
         sound = new Sound(this, 10);
+
         commonMethod = CommonMethod.getInstance();
 
         Intent intent = this.getIntent();
         outGoingMessageId = ParseUser.getCurrentUser().getObjectId();
         inComingMessageId = intent.getStringExtra(CommonValue.INCOMING_CALL_ID);
         inComingFullName = intent.getStringExtra(CommonValue.INCOMING_MESSAGE_FULL_NAME);
-        linkAvatarReceiver = intent.getStringExtra(CommonValue.MESSAGE_LOG_LINK_AVATAR_RECEVER);
 
         this.initializeToolbar();
         this.initializeComponent();
-
+        this.registerBroadcastMessage();
 
         messageAdapter = new MessageAdapter(this, inComingMessageId);
-        messageAdapter.setOnLoadedAvatar(new OnLoadedAvatar() {
+        messageAdapter.setOnLoadedInformation(new OnLoadedInformation() {
             @Override
-            public void onLoaded(boolean result) {
+            public void onLoaded(boolean result, boolean isOnline) {
                 listViewMessage.setAdapter(messageAdapter);
                 MessageActivity.this.getData();
+                toolbar.setSubtitle(isOnline ? "Online" : "Offline");
             }
         });
-        this.registerBroadcastMessage();
-        GlobalApplication.startActivityMessage = true;
     }
 
     private void initializeToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         this.setSupportActionBar(toolbar);
         this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         this.getSupportActionBar().setTitle(inComingFullName);
-        toolbar.setSubtitle("Online");
     }
 
     private void initializeComponent() {
@@ -131,18 +131,18 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         layoutMain = (RelativeLayout) findViewById(R.id.layoutMain);
         layoutMain.getViewTreeObserver().addOnGlobalLayoutListener(this);
         menu = (RelativeLayout) findViewById(R.id.menu);
-
         emoticons = (LinearLayout) findViewById(R.id.emoticons);
-
+        txtStatus = (TextView) findViewById(R.id.txtStatus);
         listViewMessage = (ListView) findViewById(R.id.listViewMessage);
         listViewMessage.setSelected(false);
-
         btnAttach = (ImageView) findViewById(R.id.btnAttach);
         btnAttach.setOnClickListener(this);
         btnPicture = (ImageView) findViewById(R.id.btnPicture);
         btnPicture.setOnClickListener(this);
         btnCamera = (ImageView) findViewById(R.id.btnCamera);
         btnCamera.setOnClickListener(this);
+        btnMap = (ImageView) findViewById(R.id.btnMap);
+        btnMap.setOnClickListener(this);
         btnSend = (ImageView) findViewById(R.id.btnSend);
         btnSend.setEnabled(false);
         btnSend.setOnClickListener(this);
@@ -262,9 +262,6 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                 if (e != null) {
                     return;
                 }
-                if ( list.size() > 0 ) {
-                    timeGetDataMessage = list.get(0).getCreatedAt().getTime();
-                }
                 for (ParseObject message : list) {
                     reentrantLock.lock();
                     int type = MessageAdapter.TYPE_INCOMING;
@@ -315,17 +312,16 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.btnSend:
                 content = edtContent.getText().toString();
                 edtContent.setText("");
+                txtStatus.setText("Sending...");
                 Intent intentSend = new Intent();
                 intentSend.setAction(CommonValue.ACTION_SEND_MESSAGE);
                 intentSend.putExtra(CommonValue.INCOMING_MESSAGE_ID, inComingMessageId);
                 intentSend.putExtra(CommonValue.INCOMING_MESSAGE_FULL_NAME, inComingFullName);
                 intentSend.putExtra(CommonValue.MESSAGE_CONTENT, content);
                 intentSend.putExtra(CommonValue.AHIHI_KEY_DATE, commonMethod.getMessageDate());
-                intentSend.putExtra(CommonValue.MESSAGE_LOG_LINK_AVATAR_RECEVER, linkAvatarReceiver);
                 MessageActivity.this.sendBroadcast(intentSend);
                 break;
             case R.id.imgEmoticon:
-
                 if (!isOpenEmoticons) {
                     isOpenEmoticons = true;
                     emoticons.setVisibility(View.VISIBLE);
@@ -356,10 +352,32 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                     this.startActivityForResult(intentCamera, REQUEST_CAMERA);
                 }
                 break;
+            case R.id.btnMap:
+                Intent intentMap = new Intent();
+                intentMap.setAction(CommonValue.ACTION_MAP);
+                intentMap.putExtra(CommonValue.USER_ID, inComingMessageId);
+                intentMap.putExtra(CommonValue.INCOMING_MESSAGE_FULL_NAME,
+                        ((GlobalApplication) MessageActivity.this.getApplication()).getFullName());
+                this.sendBroadcast(intentMap);
+                Snackbar snackbar = Snackbar.make(view, "Please waiting...", Snackbar.LENGTH_LONG)
+                        .setAction("ACTION", null);
+                View snackbarView = snackbar.getView();
+                snackbarView.setBackgroundColor(Color.parseColor("#4caf50"));
+                snackbar.show();
+                break;
         }
     }
 
-
+    private void registerBroadcastMessage() {
+        if (broadcastMessage == null) {
+            broadcastMessage = new BroadcastMessage();
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(CommonValue.STATE_MESSAGE_SENT);
+            intentFilter.addAction(CommonValue.STATE_MESSAGE_INCOMING);
+            intentFilter.addAction(CommonValue.STATE_MESSAGE_DELIVERED);
+            MessageActivity.this.registerReceiver(broadcastMessage, intentFilter);
+        }
+    }
 
     @Override
     public void onGlobalLayout() {
@@ -391,6 +409,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         if (resultCode != Activity.RESULT_OK) {
             return;
         }
+        txtStatus.setText("Sending...");
         switch (requestCode) {
             case REQUEST_ATTACH:
                 String pathFile = data.getData().getPath();
@@ -401,7 +420,6 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                 intentAttach.putExtra(CommonValue.MESSAGE_CONTENT, pathFile);
                 intentAttach.putExtra(CommonValue.AHIHI_KEY, CommonValue.AHIHI_KEY_FILE);
                 intentAttach.putExtra(CommonValue.AHIHI_KEY_DATE, commonMethod.getMessageDate());
-                intentAttach.putExtra(CommonValue.MESSAGE_LOG_LINK_AVATAR_RECEVER, linkAvatarReceiver);
                 MessageActivity.this.sendBroadcast(intentAttach);
                 break;
             case REQUEST_PICTURE:
@@ -413,7 +431,6 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                 intentPicture.putExtra(CommonValue.MESSAGE_CONTENT, pathPicture);
                 intentPicture.putExtra(CommonValue.AHIHI_KEY, CommonValue.AHIHI_KEY_PICTURE);
                 intentPicture.putExtra(CommonValue.AHIHI_KEY_DATE, commonMethod.getMessageDate());
-                intentPicture.putExtra(CommonValue.MESSAGE_LOG_LINK_AVATAR_RECEVER, linkAvatarReceiver);
                 MessageActivity.this.sendBroadcast(intentPicture);
                 break;
             case REQUEST_CAMERA:
@@ -430,7 +447,6 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                 intentCamera.putExtra(CommonValue.MESSAGE_CONTENT, capturedImageFilePath);
                 intentCamera.putExtra(CommonValue.AHIHI_KEY, CommonValue.AHIHI_KEY_PICTURE);
                 intentCamera.putExtra(CommonValue.AHIHI_KEY_DATE, commonMethod.getMessageDate());
-                intentCamera.putExtra(CommonValue.MESSAGE_LOG_LINK_AVATAR_RECEVER, linkAvatarReceiver);
                 MessageActivity.this.sendBroadcast(intentCamera);
                 break;
         }
@@ -448,27 +464,12 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         return path;
     }
 
-    private void registerBroadcastMessage() {
-        if (broadcastMessage == null) {
-            broadcastMessage = new BroadcastMessage();
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(CommonValue.STATE_MESSAGE_SENT);
-            intentFilter.addAction(CommonValue.STATE_MESSAGE_INCOMING);
-            intentFilter.addAction(CommonValue.MESSAGE_SEND_EMOTION);
-            MessageActivity.this.registerReceiver(broadcastMessage, intentFilter);
-        }
-    }
 
     private class BroadcastMessage extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case CommonValue.STATE_MESSAGE_SENT:
-                    Log.i(TAG, "time message: " + intent.getLongExtra(CommonValue.MESSAGE_TIME, -1));
-                    Log.i(TAG, "time old message: " + timeGetDataMessage);
-                    if ( intent.getLongExtra(CommonValue.MESSAGE_TIME, -1) <= timeGetDataMessage) {
-                        return;
-                    }
                     sound.playMessageSent();
 
                     String key = intent.getStringExtra(CommonValue.AHIHI_KEY);
@@ -501,6 +502,8 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                                 break;
                         }
                     }
+
+                    txtStatus.setText("Sent");
                     break;
                 case CommonValue.STATE_MESSAGE_INCOMING:
                     String keyIncoming = intent.getStringExtra(CommonValue.AHIHI_KEY);
@@ -533,19 +536,9 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                         }
                     }
                     break;
-                case CommonValue.MESSAGE_SEND_EMOTION:
-                    Intent intentEmoticon = new Intent();
-                    intentEmoticon.setAction(CommonValue.ACTION_SEND_MESSAGE);
-                    intentEmoticon.putExtra(CommonValue.INCOMING_MESSAGE_ID, inComingMessageId);
-                    intentEmoticon.putExtra(CommonValue.INCOMING_MESSAGE_FULL_NAME, inComingFullName);
-                    String emoticonId = intent.getStringExtra(CommonValue.KEY_EMOTION);
-                    intentEmoticon.putExtra(CommonValue.MESSAGE_CONTENT, emoticonId);
-                    Log.i(TAG, "onReceive_ key emo: " + emoticonId);
-                    intentEmoticon.putExtra(CommonValue.AHIHI_KEY, CommonValue.AHIHI_KEY_EMOTICON);
-                    intentEmoticon.putExtra(CommonValue.AHIHI_KEY_DATE,
-                            CommonMethod.getInstance().getMessageDate());
-                    intentEmoticon.putExtra(CommonValue.MESSAGE_LOG_LINK_AVATAR_RECEVER, linkAvatarReceiver);
-                    MessageActivity.this.sendBroadcast(intentEmoticon);
+                case CommonValue.STATE_MESSAGE_DELIVERED:
+                    txtStatus.setText("Delivered");
+                    break;
             }
             listViewMessage.setSelection(messageAdapter.getCount());
         }
@@ -568,6 +561,11 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                 intentCall.putExtra(CommonValue.INCOMING_CALL_ID, inComingMessageId);
                 this.startActivity(intentCall);
                 break;
+            case R.id.action_view_profile:
+                Intent intentProfile = new Intent(this, DetailActivity.class);
+                intentProfile.putExtra(CommonValue.USER_ID, inComingMessageId);
+                this.startActivity(intentProfile);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -583,12 +581,10 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
         super.onBackPressed();
     }
 
-
     @Override
     protected void onDestroy() {
         GlobalApplication.startActivityMessage = false;
         this.unregisterReceiver(broadcastMessage);
-        broadcastMessage = null;
         super.onDestroy();
     }
 

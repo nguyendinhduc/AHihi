@@ -26,12 +26,21 @@
         android:id="@+id/listViewMessage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/layout"
+        android:layout_above="@+id/txtStatus"
         android:layout_below="@+id/shadow"
-        android:layout_marginBottom="16dp"
         android:background="@android:color/transparent"
         android:divider="@null"
         android:stackFromBottom="true" />
+
+    <TextView
+        android:id="@+id/txtStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/layout"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:textColor="@color/colorPrimary"
+        android:textStyle="normal" />
 
     <LinearLayout
         android:id="@+id/layout"
@@ -110,6 +119,7 @@
                     android:tint="#9e9e9e" />
 
                 <ImageView
+                    android:id="@+id/btnMap"
                     style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
                     android:layout_width="48dp"
                     android:layout_height="48dp"

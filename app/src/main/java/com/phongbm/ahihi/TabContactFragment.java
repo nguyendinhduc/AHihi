@@ -48,6 +48,7 @@ public class TabContactFragment extends Fragment implements SwipeRefreshLayout.O
         swipeRefreshLayout.setColorSchemeColors(Color.parseColor("#f44336"),
                 Color.parseColor("#2196f3"), Color.parseColor("#4caf50"));
         swipeRefreshLayout.setOnRefreshListener(this);
+
         listViewContact = (ListView) view.findViewById(R.id.listViewContact);
         listViewContact.setOnScrollListener(this);
     }

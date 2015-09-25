@@ -41,13 +41,13 @@ public class MainFragment extends AppCompatActivity {
                 .replace(android.R.id.content, signupFragment).commit();
     }
 
-    public void showProfileInfomationFragment() {
+    public void showProfileInformationFragment() {
         this.getFragmentManager().beginTransaction()
                 .setCustomAnimations(R.anim.anim_in_right, R.anim.anim_out_left)
                 .replace(android.R.id.content, profileInformationFragment).commit();
     }
 
-    public void showProfileInfomationFragmentBack() {
+    public void showProfileInformationFragmentBack() {
         this.getFragmentManager().beginTransaction()
                 .setCustomAnimations(R.anim.anim_in_left, R.anim.anim_out_right)
                 .replace(android.R.id.content, profileInformationFragment).commit();
@@ -63,6 +63,10 @@ public class MainFragment extends AppCompatActivity {
         return profileInformationFragment;
     }
 
+    public SignupFragment getSignUpFragment() {
+        return signupFragment;
+    }
+
     @Override
     public void onBackPressed() {
         if (loginFragment.isVisible() || signupFragment.isVisible()) {
@@ -71,7 +75,7 @@ public class MainFragment extends AppCompatActivity {
             if (profileInformationFragment.isVisible()) {
             } else {
                 if (profilePictureFragment.isVisible()) {
-                    this.showProfileInfomationFragmentBack();
+                    this.showProfileInformationFragmentBack();
                 } else {
                     super.onBackPressed();
                 }

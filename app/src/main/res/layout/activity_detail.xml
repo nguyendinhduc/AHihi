@@ -23,15 +23,6 @@
             app:expandedTitleMarginStart="48dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <!--<ImageView
-                android:id="@+id/image"
-                android:layout_width="match_parent"
-                android:layout_height="256dp"
-                android:fitsSystemWindows="true"
-                android:scaleType="centerCrop"
-                android:src="@drawable/wallpaper_1"
-                app:layout_collapseMode="parallax" />-->
-
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="256dp"
@@ -39,7 +30,7 @@
                 app:layout_collapseMode="parallax">
 
                 <ImageView
-                    android:id="@+id/image"
+                    android:id="@+id/imgWallpaper"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
@@ -56,21 +47,21 @@
                     android:padding="4dp">
 
                     <com.phongbm.libs.SquareImageView
+                        android:id="@+id/imgAvatar"
                         android:layout_width="96dp"
                         android:layout_height="96dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/wallpaper_2" />
+                        android:scaleType="centerCrop" />
 
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/txtFullName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_marginBottom="32dp"
                     android:layout_marginLeft="136dp"
                     android:layout_marginStart="136dp"
-                    android:text="Phong Bui Minh"
                     android:textColor="#ffffff"
                     android:textSize="24sp" />
 
@@ -129,9 +120,9 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/txtPhoneNumber"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="(+84) 989192072"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -182,9 +173,9 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/txtEmail"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="phongbmbm.it@gmail.com"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -235,9 +226,9 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/txtBirthday"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="18/12/1994"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -287,9 +278,9 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/txtSex"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Male"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -326,7 +317,7 @@
         android:layout_marginRight="16dp"
         android:src="@drawable/abc_btn_rating_star_on_mtrl_alpha"
         android:tint="#ffeb3b"
-        app:backgroundTint="@color/colorPrimary"
+        app:backgroundTint="#e91e63"
         app:layout_anchor="@id/app_bar"
         app:layout_anchorGravity="bottom|right|end" />
 

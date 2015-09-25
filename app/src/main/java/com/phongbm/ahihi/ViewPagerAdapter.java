@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class ViewPagerAdapter extends FragmentPagerAdapter {
     private ArrayList<Fragment> fragments;
-    private String[] titles = new String[]{"Messages", "Contacts", "Friends", "AccountActivity"};
+    private String[] titles = new String[]{"Messages", "Contacts", "Friends", "Account"};
 
     public ViewPagerAdapter(Context context, FragmentManager fragmentManager) {
         super(fragmentManager);

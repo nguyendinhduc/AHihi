@@ -4,19 +4,19 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.phongbm.ahihi.R;
-import com.phongbm.common.CommonValue;
 
 public class ImageActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     private static final String TAG = "ImageActivity";
+    private static final int REQUEST_CROP_AVATAR = 0;
 
     private GridView gridViewImage;
     private ImageAdapter imageAdapter;
@@ -24,7 +24,7 @@ public class ImageActivity extends AppCompatActivity implements AdapterView.OnIt
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_image);
+        this.setContentView(R.layout.activity_image);
         this.initializeToolbar();
         this.initializeComponent();
 
@@ -46,14 +46,15 @@ public class ImageActivity extends AppCompatActivity implements AdapterView.OnIt
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         String url = (String) parent.getItemAtPosition(position);
-        if (!checkMinimumSize(url)) {
-            Toast.makeText(this, "Picture too small", Toast.LENGTH_SHORT).show();
+        if (checkMinimumSize(url)) {
+            Snackbar.make(view, "Picture too small", Snackbar.LENGTH_LONG)
+                    .setAction("ACTION", null)
+                    .show();
             return;
         }
         Intent intent = new Intent(ImageActivity.this, ImageControl.class);
         intent.putExtra(ImageControl.EXTRA_IMAGE, url);
-        this.startActivityForResult(intent, CommonValue.REQUECODE_SET_AVATAR);
-        return;
+        this.startActivityForResult(intent, REQUEST_CROP_AVATAR);
     }
 
     private boolean checkMinimumSize(String url) {
@@ -62,18 +63,14 @@ public class ImageActivity extends AppCompatActivity implements AdapterView.OnIt
         BitmapFactory.decodeFile(url, options);
         int width = options.outWidth;
         int height = options.outHeight;
-        if (width < 200 || height < 200) {
-            return false;
-        }
-        return true;
+        return (width < 200 || height < 200);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent result) {
-        if (requestCode == CommonValue.REQUECODE_SET_AVATAR && resultCode == Activity.RESULT_OK) {
-            setResult(Activity.RESULT_OK, result);
-            Log.i(TAG, "onActivityResult");
-            finish();
+        if (requestCode == REQUEST_CROP_AVATAR && resultCode == Activity.RESULT_OK) {
+            this.setResult(Activity.RESULT_OK, result);
+            this.finish();
         }
     }
 

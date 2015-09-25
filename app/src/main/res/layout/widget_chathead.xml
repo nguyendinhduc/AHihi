@@ -5,11 +5,12 @@
     android:layout_height="wrap_content"
     android:layout_gravity="end">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imgAvatar"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:contentDescription="@null"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_ahihi_online" />
+        android:src="@drawable/ic_avatar_default" />
 
 </RelativeLayout>

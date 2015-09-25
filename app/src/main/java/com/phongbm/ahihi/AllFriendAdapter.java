@@ -1,11 +1,7 @@
 package com.phongbm.ahihi;
 
+import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,101 +9,27 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.parse.GetCallback;
-import com.parse.GetDataCallback;
-import com.parse.ParseException;
-import com.parse.ParseFile;
-import com.parse.ParseQuery;
-import com.parse.ParseUser;
-import com.phongbm.common.CommonMethod;
-import com.phongbm.common.CommonValue;
 import com.phongbm.common.GlobalApplication;
 import com.phongbm.common.OnShowPopupMenu;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AllFriendAdapter extends BaseAdapter {
     private static final String TAG = "FriendAdapter";
 
-    private Handler handler;
     private ArrayList<AllFriendItem> allFriendItems;
-    private ArrayList<ActiveFriendItem> activeFriendItems;
     private LayoutInflater layoutInflater;
     private OnShowPopupMenu onShowPopupMenu;
 
-    public AllFriendAdapter(Context context, Handler handler) {
+    public AllFriendAdapter(Context context, Activity activity) {
         layoutInflater = LayoutInflater.from(context);
-        this.handler = handler;
-        allFriendItems = new ArrayList<AllFriendItem>();
-        activeFriendItems = new ArrayList<ActiveFriendItem>();
-        if (MainActivity.isNetworkConnected(context))
-            this.initializeListFriend();
-    }
 
-    private void initializeListFriend() {
-        ParseUser currentUser = ParseUser.getCurrentUser();
-        ArrayList<String> listFriendId = (ArrayList<String>) currentUser.get("listFriend");
-        if (listFriendId == null || listFriendId.size() == 0) {
-            return;
-        }
-        for (int i = 0; i < listFriendId.size(); i++) {
-            ParseQuery<ParseUser> parseQuery = ParseUser.getQuery();
-            parseQuery.whereEqualTo("objectId", listFriendId.get(i));
-            parseQuery.getFirstInBackground(new GetCallback<ParseUser>() {
-                @Override
-                public void done(final ParseUser parseUser, ParseException e) {
-                    final ParseFile parseFile = (ParseFile) parseUser.get("avatar");
-                    if (parseFile == null) {
-                        return;
-                    }
-//                    parseFile.getDataInBackground(new GetDataCallback() {
-//                        @Override
-//                        public void done(byte[] bytes, ParseException e) {
-//                            if (e != null) {
-//                                return;
-//                            }
-//                            Bitmap avatar = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-//                            AllFriendItem allFriendItem = new AllFriendItem(parseUser.getObjectId(), avatar,
-//                                    parseUser.getUsername(), parseUser.getString("fullName"));
-//
-//                            String urlAvatar = parseFile.getUrl();
-//                            allFriendItem.setUrlAvatar(urlAvatar);
-//                            allFriendItems.add(allFriendItem);
-//
-//                            Collections.sort(allFriendItems);
-//
-//                            if (parseUser.getBoolean("isOnline")) {
-//                                ActiveFriendItem activeFriendItem = new ActiveFriendItem(parseUser.getObjectId(),
-//                                        avatar, parseUser.getUsername(), parseUser.getString("fullName"));
-//                                activeFriendItem.setUrlAvatar(urlAvatar);
-//                                activeFriendItems.add(activeFriendItem);
-//                            }
-//                        }
-//                    });
-                    String urlAvatar = parseFile.getUrl();
-                    AllFriendItem allFriendItem = new AllFriendItem(parseUser.getObjectId(), urlAvatar,
-                            parseUser.getUsername(), parseUser.getString("fullName"));
-                    allFriendItems.add(allFriendItem);
-
-                    Collections.sort(allFriendItems);
-
-                    if (parseUser.getBoolean("isOnline")) {
-                        ActiveFriendItem activeFriendItem = new ActiveFriendItem(parseUser.getObjectId(),
-                                urlAvatar, parseUser.getUsername(), parseUser.getString("fullName"));
-                        activeFriendItem.setUrlAvatar(urlAvatar);
-                        activeFriendItems.add(activeFriendItem);
-                    }
-                    Message message = new Message();
-                    message.what = CommonValue.ACTION_UPDATE_LIST_FRIEND;
-                    message.setTarget(handler);
-                    message.sendToTarget();
-                }
-            });
+        if (((GlobalApplication) activity.getApplication()).getAllFriendItems() != null) {
+            allFriendItems = ((GlobalApplication) activity.getApplication()).getAllFriendItems();
+        } else {
+            allFriendItems = new ArrayList<>();
         }
     }
 
@@ -126,27 +48,38 @@ public class AllFriendAdapter extends BaseAdapter {
         return position;
     }
 
+    /*@Override
+    public int getViewTypeCount() {
+        return 2;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (allFriendItems.get(position).getType() == 1) {
+            return 1;
+        }
+        return 0;
+    }*/
+
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
         final ViewHolder viewHolder;
         if (convertView == null) {
-            convertView = layoutInflater.inflate(R.layout.item_all_friend, parent, false);
             viewHolder = new ViewHolder();
+            //if (getItemViewType(position) == 1) {
+            convertView = layoutInflater.inflate(R.layout.item_all_friend, parent, false);
             viewHolder.imgAvatar = (CircleImageView) convertView.findViewById(R.id.imgAvatar);
-            viewHolder.txtName = (TextView) convertView.findViewById(R.id.txtName);
             viewHolder.menu = (ImageView) convertView.findViewById(R.id.menu);
+            /*} else {
+                convertView = layoutInflater.inflate(R.layout.item_all_friend_header, parent, false);
+            }*/
+            viewHolder.txtName = (TextView) convertView.findViewById(R.id.txtName);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-//        viewHolder.imgAvatar.setImageBitmap(allFriendItems.get(position).getAvatar());
-        Picasso.with(parent.getContext()).load(allFriendItems.get(position).getUrlAvatar())
-                .resize(CommonMethod.getInstance().convertSizeIcon(GlobalApplication.DENSITY_DPI, 48),
-                        CommonMethod.getInstance().convertSizeIcon(GlobalApplication.DENSITY_DPI, 48))
-                .placeholder(R.drawable.loading_picture)
-                .error(R.drawable.ic_launcher_ahihi)
-                .centerCrop()
-                .into(viewHolder.imgAvatar);
+        //if (getItemViewType(position) == 1) {
+        viewHolder.imgAvatar.setImageBitmap(allFriendItems.get(position).getAvatar());
         viewHolder.txtName.setText(allFriendItems.get(position).getFullName());
         viewHolder.menu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,6 +87,9 @@ public class AllFriendAdapter extends BaseAdapter {
                 onShowPopupMenu.onShowPopupMenuListener(position, viewHolder.menu);
             }
         });
+       /* } else {
+            viewHolder.txtName.setText(allFriendItems.get(position).getId());
+        }*/
         return convertView;
     }
 
@@ -169,10 +105,6 @@ public class AllFriendAdapter extends BaseAdapter {
 
     public ArrayList<AllFriendItem> getAllFriendItems() {
         return allFriendItems;
-    }
-
-    public ArrayList<ActiveFriendItem> getActiveFriendItems() {
-        return activeFriendItems;
     }
 
 }

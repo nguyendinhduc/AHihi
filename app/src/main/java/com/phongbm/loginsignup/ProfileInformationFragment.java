@@ -2,14 +2,15 @@ package com.phongbm.loginsignup;
 
 import android.app.DatePickerDialog;
 import android.app.Fragment;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -20,15 +21,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ProfileInformationFragment extends Fragment implements View.OnClickListener {
+    private static final String EMAIL_PATTERN =
+            "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" +
+                    "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+
     private View view;
     private EditText edtBirthday, edtFirstName, edtLastName, edtEmail;
     private Button btnOK;
     private RadioButton radioMale, radioFemale;
     private boolean isFillFirstName, isFillLastName, isFillEmail;
-    private static final String EMAIL_PATTERN =
-            "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
     private Pattern pattern;
     private Matcher matcher;
+    private boolean gender = true;
 
     public ProfileInformationFragment() {
         pattern = Pattern.compile(EMAIL_PATTERN);
@@ -37,15 +41,8 @@ public class ProfileInformationFragment extends Fragment implements View.OnClick
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_profile_infomation, null);
-        this.initializeToolbar();
         this.initializeComponent();
         return view;
-    }
-
-    private void initializeToolbar() {
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        ((MainFragment) this.getActivity()).setSupportActionBar(toolbar);
-        this.getActivity().setTitle("STEP 1");
     }
 
     private void initializeComponent() {
@@ -63,9 +60,9 @@ public class ProfileInformationFragment extends Fragment implements View.OnClick
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s != null && s.length() > 0) {
+                if (s != null && s.length() > 1) {
                     isFillFirstName = true;
-                    enabledButtonOK();
+                    ProfileInformationFragment.this.enabledButtonOK();
                 } else {
                     isFillFirstName = false;
                     btnOK.setEnabled(false);
@@ -83,9 +80,9 @@ public class ProfileInformationFragment extends Fragment implements View.OnClick
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s != null && s.length() > 0) {
+                if (s != null && s.length() > 1) {
                     isFillLastName = true;
-                    enabledButtonOK();
+                    ProfileInformationFragment.this.enabledButtonOK();
                 } else {
                     isFillLastName = false;
                     btnOK.setEnabled(false);
@@ -103,9 +100,9 @@ public class ProfileInformationFragment extends Fragment implements View.OnClick
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s != null && s.length() > 0) {
+                if (s != null && s.length() > 1) {
                     isFillEmail = true;
-                    enabledButtonOK();
+                    ProfileInformationFragment.this.enabledButtonOK();
                 } else {
                     isFillEmail = false;
                     btnOK.setEnabled(false);
@@ -123,6 +120,30 @@ public class ProfileInformationFragment extends Fragment implements View.OnClick
         });
         radioMale = (RadioButton) view.findViewById(R.id.radioMale);
         radioFemale = (RadioButton) view.findViewById(R.id.radioFemale);
+        radioMale.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    gender = true;
+                    radioMale.setTextColor(Color.parseColor("#4caf50"));
+                } else {
+                    gender = false;
+                    radioMale.setTextColor(Color.parseColor("#666666"));
+                }
+            }
+        });
+        radioFemale.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    gender = false;
+                    radioFemale.setTextColor(Color.parseColor("#4caf50"));
+                } else {
+                    gender = true;
+                    radioFemale.setTextColor(Color.parseColor("#666666"));
+                }
+            }
+        });
     }
 
     private void enabledButtonOK() {
@@ -176,14 +197,7 @@ public class ProfileInformationFragment extends Fragment implements View.OnClick
     }
 
     public boolean getSex() {
-        if (radioMale.isChecked()) {
-            return true;
-        } else {
-            if (radioFemale.isChecked()) {
-                return false;
-            }
-        }
-        return true;
+        return gender;
     }
 
     public boolean validate(final String hex) {

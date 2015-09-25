@@ -1,5 +1,6 @@
 package com.phongbm.ahihi;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.phongbm.common.GlobalApplication;
 import com.phongbm.common.OnShowPopupMenu;
 
 import java.util.ArrayList;
@@ -19,13 +21,14 @@ public class ActiveFriendAdapter extends BaseAdapter {
     private ArrayList<ActiveFriendItem> activeFriendItems;
     private OnShowPopupMenu onShowPopupMenu;
 
-    public ActiveFriendAdapter(Context context) {
+    public ActiveFriendAdapter(Context context, Activity activity) {
         layoutInflater = LayoutInflater.from(context);
-        activeFriendItems = new ArrayList<ActiveFriendItem>();
-    }
 
-    public void setActiveFriendItems(ArrayList<ActiveFriendItem> activeFriendItems) {
-        this.activeFriendItems = activeFriendItems;
+        if (((GlobalApplication) activity.getApplication()).getAllFriendItems() != null) {
+            activeFriendItems = ((GlobalApplication) activity.getApplication()).getActiveFriendItems();
+        } else {
+            activeFriendItems = new ArrayList<>();
+        }
     }
 
     @Override

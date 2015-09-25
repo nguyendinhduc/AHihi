@@ -3,9 +3,8 @@ package com.phongbm.ahihi;
 import android.graphics.Bitmap;
 
 public class FriendItem {
-    protected String id, fullName, phoneNumber;
-    protected String urlAvatar;
-    protected Bitmap avatar;
+    private String id, fullName, phoneNumber;
+    private Bitmap avatar;
 
     public FriendItem() {
     }
@@ -13,13 +12,6 @@ public class FriendItem {
     public FriendItem(String id, Bitmap avatar, String phoneNumber, String fullName) {
         this.id = id;
         this.avatar = avatar;
-        this.phoneNumber = phoneNumber;
-        this.fullName = fullName;
-    }
-
-    public FriendItem(String id, String urlAvatar, String phoneNumber, String fullName) {
-        this.id = id;
-        this.urlAvatar = urlAvatar;
         this.phoneNumber = phoneNumber;
         this.fullName = fullName;
     }
@@ -56,11 +48,4 @@ public class FriendItem {
         this.fullName = fullName;
     }
 
-    public String getUrlAvatar() {
-        return urlAvatar;
-    }
-
-    public void setUrlAvatar(String urlAvatar) {
-        this.urlAvatar = urlAvatar;
-    }
 }

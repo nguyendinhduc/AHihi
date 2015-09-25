@@ -48,5 +48,4 @@ public class CollectionEmoticonAdapter extends PagerAdapter {
         ((ViewPager) container).removeView((View) object);
     }
 
-
 }

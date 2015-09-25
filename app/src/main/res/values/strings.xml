@@ -5,9 +5,13 @@
     <string name="activity_call_logs">Call Logs</string>
     <string name="activity_country_codes">Country Codes</string>
     <string name="activity_picture">Picture</string>
+    <string name="activity_new_message">New Message</string>
+    <string name="activity_about_us">About Us</string>
+    <string name="activity_my_account">My Account</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="forgot_password"><u>Forgot password?</u></string>
+    <string name="term_condition">I agree to <b>THE TERMS AND CONDITIONS</b></string>
+    <string name="forgot_password">Forgot Password?</string>
     <string name="log_in">LOG IN</string>
     <string name="sign_up">SIGN UP</string>
     <string name="open_navigation_drawer">OPEN</string>

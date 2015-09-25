@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -8,7 +7,18 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/layoutImage"></RelativeLayout>
+        android:layout_above="@+id/layoutImage">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Crop Image"
+            android:textColor="@color/green_500"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
 
 
     <RelativeLayout
@@ -18,7 +28,7 @@
         android:layout_centerVertical="true">
 
         <com.phongbm.image.TouchImageView
-            android:id="@+id/img"
+            android:id="@+id/image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop" />
@@ -27,6 +37,7 @@
             android:id="@+id/imageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@null"
             android:scaleType="centerCrop"
             android:src="#AF000000" />
     </RelativeLayout>
@@ -40,29 +51,37 @@
 
         <Button
             android:id="@+id/btnCrop"
-            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
-            android:text="Crop" />
+            android:layout_marginStart="4dp"
+            android:background="@drawable/bg_button_round"
+            android:text="Crop"
+            android:textColor="#ffffff" />
 
         <Button
             android:id="@+id/btnRotate"
-            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_toEndOf="@+id/btnCrop"
             android:layout_toRightOf="@+id/btnCrop"
-            android:text="Rotate" />
+            android:background="@drawable/bg_button_round"
+            android:text="Rotate"
+            android:textColor="#ffffff" />
 
         <Button
             android:id="@+id/btnCancel"
-            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_toEndOf="@+id/btnRotate"
             android:layout_toRightOf="@+id/btnRotate"
-            android:text="Cancel" />
+            android:background="@drawable/bg_button_round"
+            android:text="Cancel"
+            android:textColor="#ffffff" />
 
     </RelativeLayout>
 

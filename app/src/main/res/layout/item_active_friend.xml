@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
-    android:background="@color/green_500">
+    android:layout_height="64dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:background="#ffffff"
         android:descendantFocusability="blocksDescendants"
         android:paddingBottom="8dp"
         android:paddingLeft="8dp"
@@ -31,6 +29,7 @@
             android:layout_marginStart="40dp"
             android:layout_marginTop="28dp"
             android:background="@drawable/bg_circle_white"
+            android:contentDescription="@null"
             android:padding="1dp"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_ahihi_online" />
@@ -62,17 +61,19 @@
 
         <ImageView
             android:id="@+id/menu"
+            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
+            android:contentDescription="@null"
             android:padding="12dp"
             android:src="@drawable/ic_popup_menu" />
 
     </RelativeLayout>
 
-    <LinearLayout
+    <!--<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:background="@color/green_500"
@@ -103,6 +104,6 @@
             android:textColor="#ffffff"
             android:textStyle="bold" />
 
-    </LinearLayout>
+    </LinearLayout>-->
 
 </RelativeLayout>

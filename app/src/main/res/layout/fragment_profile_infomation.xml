@@ -6,35 +6,36 @@
     android:focusable="true"
     android:focusableInTouchMode="true">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <View
-        android:id="@+id/shadow"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_below="@+id/toolbar"
-        android:background="@drawable/shadow" />
+    <TextView
+        android:id="@+id/txtStep1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="48dp"
+        android:text="STEP 1"
+        android:textColor="@color/green_500"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/txtLogo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/shadow"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="32dp"
+        android:layout_below="@+id/txtStep1"
+        android:layout_marginLeft="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
         android:text="Profile Information"
         android:textColor="@color/green_500"
-        android:textSize="32sp" />
+        android:textSize="32sp"
+        android:textStyle="bold" />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtLogo"
+        android:layout_marginTop="16dp"
         android:background="#ffffff"
         android:paddingLeft="32dp"
         android:paddingRight="32dp">
@@ -113,7 +114,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:text="Birthday"
-                android:textColor="@color/colorPrimary"
+                android:textColor="#666666"
                 android:textSize="20sp" />
 
             <EditText
@@ -144,7 +145,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:text="Sex"
-                android:textColor="@color/colorPrimary"
+                android:textColor="#666666"
                 android:textSize="20sp" />
 
             <RadioGroup
@@ -167,7 +168,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Female"
-                    android:textColor="@color/green_500" />
+                    android:textColor="#666666" />
 
             </RadioGroup>
 
@@ -179,7 +180,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/layoutSex"
             android:layout_marginTop="16dp"
-            android:background="@drawable/bg_button"
+            android:background="@drawable/bg_button_round"
             android:enabled="false"
             android:text="SAVE AND CONTINUE"
             android:textColor="#ffffff"

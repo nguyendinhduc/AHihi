@@ -18,17 +18,22 @@ import android.text.Spanned;
 import android.text.style.ImageSpan;
 import android.util.Pair;
 
+import com.parse.GetCallback;
+import com.parse.GetDataCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
-import com.phongbm.image.ImageActivity;
+import com.phongbm.ahihi.ActiveFriendItem;
+import com.phongbm.ahihi.AllFriendItem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -98,16 +103,9 @@ public class CommonMethod {
         avatar.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
         byte[] bytes = byteArrayOutputStream.toByteArray();
         if (bytes != null) {
-            final ParseFile parseFile = new ParseFile(bytes);
+            ParseFile parseFile = new ParseFile(bytes);
             parseUser.put("avatar", parseFile);
-            parseUser.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if ( e == null ) {
-                        GlobalApplication.linkAvatarSender = parseFile.getUrl();
-                    }
-                }
-            });
+            parseUser.saveInBackground();
         }
         try {
             byteArrayOutputStream.close();
@@ -205,14 +203,58 @@ public class CommonMethod {
         return bitmap;
     }
 
-    public int convertSizeIcon ( float density, int sizeDp ) {
-        return (int) (sizeDp * ( density / 160));
+    public void loadListFriend(ParseUser currentUser, Activity activity) {
+        final ArrayList<String> listFriendId = (ArrayList<String>) currentUser.get("listFriend");
+        if (listFriendId == null || listFriendId.size() == 0) {
+            return;
+        }
+        final ArrayList<AllFriendItem> allFriendItems = ((GlobalApplication)
+                activity.getApplication()).getAllFriendItems();
+        if (allFriendItems != null) {
+            allFriendItems.clear();
+        }
+        final ArrayList<ActiveFriendItem> activeFriendItems = ((GlobalApplication)
+                activity.getApplication()).getActiveFriendItems();
+        if (activeFriendItems != null) {
+            activeFriendItems.clear();
+        }
+        for (int i = 0; i < listFriendId.size(); i++) {
+            ParseQuery<ParseUser> parseQuery = ParseUser.getQuery();
+            parseQuery.getInBackground(listFriendId.get(i), new GetCallback<ParseUser>() {
+                @Override
+                public void done(final ParseUser parseUser, ParseException e) {
+                    if (e != null) {
+                        e.printStackTrace();
+                        return;
+                    }
+                    ParseFile parseFile = (ParseFile) parseUser.get("avatar");
+                    if (parseFile == null) {
+                        return;
+                    }
+                    parseFile.getDataInBackground(new GetDataCallback() {
+                        @Override
+                        public void done(byte[] bytes, ParseException e) {
+                            if (e != null) {
+                                return;
+                            }
+                            Bitmap avatar = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                            String id = parseUser.getObjectId();
+                            String phoneNumber = parseUser.getUsername();
+                            String fullName = parseUser.getString("fullName");
+                            allFriendItems.add(new AllFriendItem(id, avatar, phoneNumber, fullName));
+                            Collections.sort(allFriendItems);
+                            if (parseUser.getBoolean("isOnline")) {
+                                activeFriendItems.add(new ActiveFriendItem(id, avatar, phoneNumber, fullName));
+                            }
+                        }
+                    });
+                }
+            });
+        }
     }
 
-    public void startActivitySetAvatar( Activity activity) {
-        Intent intentAccount = new Intent();
-        intentAccount.setClass(activity.getBaseContext(), ImageActivity.class);
-        activity.startActivityForResult(intentAccount, CommonValue.REQUECODE_SET_AVATAR);
+    public int convertSizeIcon(float density, int sizeDp) {
+        return (int) (sizeDp * (density / 160));
     }
 
 }
