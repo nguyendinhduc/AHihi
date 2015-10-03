@@ -72,7 +72,7 @@ public class TabFourFragment extends Fragment {
         listSettting = (ListView) view.findViewById(R.id.listSettting);
         itemSettings = new ArrayList<>();
         itemSettings.add(new ItemSetting(R.drawable.ic_profile, "Profile"));
-        itemSettings.add(new ItemSetting(R.drawable.ic_account, "AccountActivity"));
+        itemSettings.add(new ItemSetting(R.drawable.ic_account, "Account"));
         itemSettings.add(new ItemSetting(R.drawable.ic_privacy, "Privacy"));
         itemSettings.add(new ItemSetting(R.drawable.ic_sound, "Sound"));
         itemSettings.add(new ItemSetting(R.drawable.ic_light, "Light"));

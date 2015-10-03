@@ -50,8 +50,8 @@ public class TabContactFragment extends Fragment implements SwipeRefreshLayout.O
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        LayoutInflater layoutInflater = LayoutInflater.from(context);
-        view = layoutInflater.inflate(R.layout.tab_contact, container, false);
+//        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        view = inflater.inflate(R.layout.tab_contact, container, false);
         this.initializeComponent();
         return view;
     }
