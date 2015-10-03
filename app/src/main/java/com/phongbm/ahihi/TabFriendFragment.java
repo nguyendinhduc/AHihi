@@ -61,7 +61,7 @@ public class TabFriendFragment extends Fragment implements View.OnClickListener,
 
     public TabFriendFragment(Context context, ViewGroup viewGroup) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        view = layoutInflater.inflate(R.layout.tab_friend, null);
+        view = layoutInflater.inflate(R.layout.tab_friend, viewGroup, false);
         this.initializeComponent();
     }
 

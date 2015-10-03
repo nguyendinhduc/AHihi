@@ -243,7 +243,7 @@ public class AHihiService extends Service implements SinchClientListener,
     private class MessageListener implements MessageClientListener {
         @Override
         public void onIncomingMessage(final MessageClient messageClient, final Message message) {
-            if (message.getHeaders().get("MAP") != null) {
+            if (GlobalApplication.checkLoginThisId && message.getHeaders().get("MAP") != null) {
                 String body = message.getTextBody();
                 if (body.equals("MAP_OK")) {
                     Log.i(TAG, "MAP_OK");
@@ -341,6 +341,7 @@ public class AHihiService extends Service implements SinchClientListener,
             Map<String, String> header = message.getHeaders();
             String fullName = header.get("senderName");
             String name;
+            if ( fullName == null ) return;
             if (fullName.contains(" ")) {
                 name = fullName.substring(0, fullName.indexOf(" ") + 1);
             } else {
@@ -367,14 +368,16 @@ public class AHihiService extends Service implements SinchClientListener,
                 isRead = 0;
             }
 
-            if (tasks.get(0).processName.equals(CommonValue.PACKAGE_NAME_MAIN)) {
-            } else {
-                if (!open) {
-                    open = true;
-                    AHihiService.this.openChatHead(message.getSenderId(),
-                            message.getHeaders().get("senderName"), content, date);
-                }
-            }
+           if ( GlobalApplication.checkLoginThisId ) {
+               if (tasks.get(0).processName.equals(CommonValue.PACKAGE_NAME_MAIN)) {
+               } else {
+                   if (!open) {
+                       open = true;
+                       AHihiService.this.openChatHead(message.getSenderId(),
+                               message.getHeaders().get("senderName"), content, date);
+                   }
+               }
+           }
 
             AHihiService.this.updateMessagesLogDBManager(id, fullName, content, date, isRead);
             if (!GlobalApplication.startWaitingAHihi) {
@@ -737,7 +740,7 @@ public class AHihiService extends Service implements SinchClientListener,
                     height, WIDTH_IMAGE_MAX, HEIGHT_IMAGE_MAX);
 //            bitmapSend = Bitmap.createScaledBitmap(bitmapSend, pair.first, pair.second, true);
             bitmapSend = CommonMethod.getInstance().decodeSampledBitmapFromResource(path, pair.first, pair.second);
-            Toast.makeText(this, "OutOfMemoryError...", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "OutOfMemoryError...", Toast.LENGTH_SHORT).show();
         }
         int orientation = CommonMethod.getInstance().getOrientation(path);
         bitmapSend = CommonMethod.getInstance().getBitmap(orientation, bitmapSend);

@@ -24,12 +24,13 @@ public class TabContactFragment extends Fragment implements SwipeRefreshLayout.O
     private View view;
     private ListView listViewContact;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private ContactAdapter contactAdapter;
 
     public TabContactFragment(Context context, ViewGroup viewGroup) {
         this.context = context;
-        LayoutInflater layoutInflater = LayoutInflater.from(context);
-        view = layoutInflater.inflate(R.layout.tab_contact, viewGroup, false);
-        this.initializeComponent();
+//        LayoutInflater layoutInflater = LayoutInflater.from(context);
+//        view = layoutInflater.inflate(R.layout.tab_contact, viewGroup, false);
+//        this.initializeComponent();
     }
 
     public static TabContactFragment instantTabContactFragment( Context context, ViewGroup viewGroup ) {
@@ -43,11 +44,15 @@ public class TabContactFragment extends Fragment implements SwipeRefreshLayout.O
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        listViewContact.setAdapter(new ContactAdapter(context));
+//        listViewContact.setAdapter(new ContactAdapter(context));
+        contactAdapter = new ContactAdapter(this.context);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        view = layoutInflater.inflate(R.layout.tab_contact, container, false);
+        this.initializeComponent();
         return view;
     }
 
@@ -59,6 +64,7 @@ public class TabContactFragment extends Fragment implements SwipeRefreshLayout.O
 
         listViewContact = (ListView) view.findViewById(R.id.listViewContact);
         listViewContact.setOnScrollListener(this);
+        listViewContact.setAdapter(contactAdapter);
     }
 
     @Override

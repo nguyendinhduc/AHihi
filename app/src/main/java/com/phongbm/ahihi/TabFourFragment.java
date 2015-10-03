@@ -36,8 +36,8 @@ public class TabFourFragment extends Fragment {
     private TextView txtFullName;
 
     public TabFourFragment(Context context, ViewGroup viewGroup) {
-        LayoutInflater layoutInflater = LayoutInflater.from(context);
-        view = layoutInflater.inflate(R.layout.tab_four, viewGroup, false);
+//        LayoutInflater layoutInflater = LayoutInflater.from(context);
+//        view = layoutInflater.inflate(R.layout.tab_four, viewGroup, false);
 
     }
     public static TabFourFragment instantTabContactFragment( Context context, ViewGroup viewGroup ) {
@@ -51,12 +51,15 @@ public class TabFourFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "onCreate()...");
-        this.initializeComponent();
+//        this.initializeComponent();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView()...");
+//        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        view = inflater.inflate(R.layout.tab_four, container, false);
+        this.initializeComponent();
         return view;
     }
 
