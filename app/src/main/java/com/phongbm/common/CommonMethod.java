@@ -6,11 +6,14 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
@@ -241,6 +244,8 @@ public class CommonMethod {
                             String id = parseUser.getObjectId();
                             String phoneNumber = parseUser.getUsername();
                             String fullName = parseUser.getString("fullName");
+
+                            //null
                             allFriendItems.add(new AllFriendItem(id, avatar, phoneNumber, fullName));
                             Collections.sort(allFriendItems);
                             if (parseUser.getBoolean("isOnline")) {
@@ -255,6 +260,18 @@ public class CommonMethod {
 
     public int convertSizeIcon(float density, int sizeDp) {
         return (int) (sizeDp * (density / 160));
+    }
+
+    public String getPathFromUri(Context context, Uri uri) {
+        Cursor cursor = context.getContentResolver().query(uri,
+                new String[]{MediaStore.Images.Media.DATA}, null, null, null);
+        if (cursor == null) {
+            return null;
+        }
+        cursor.moveToFirst();
+        String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+        cursor.close();
+        return path;
     }
 
 }

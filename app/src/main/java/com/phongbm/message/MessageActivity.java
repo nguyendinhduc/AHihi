@@ -22,6 +22,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -341,14 +342,6 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.btnCamera:
                 Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (intentCamera.resolveActivity(getPackageManager()) != null) {
-                    @SuppressLint("SimpleDateFormat")
-                    String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-                    String fileName = "AHIHI_" + date;
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(MediaStore.Images.Media.TITLE, fileName);
-                    capturedImageURI = getContentResolver().insert(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-                    intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageURI);
                     this.startActivityForResult(intentCamera, REQUEST_CAMERA);
                 }
                 break;
@@ -423,7 +416,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                 MessageActivity.this.sendBroadcast(intentAttach);
                 break;
             case REQUEST_PICTURE:
-                String pathPicture = this.getPathFromUri(data.getData());
+                String pathPicture = CommonMethod.getInstance().getPathFromUri(MessageActivity.this, data.getData());
                 Intent intentPicture = new Intent();
                 intentPicture.setAction(CommonValue.ACTION_SEND_MESSAGE);
                 intentPicture.putExtra(CommonValue.INCOMING_MESSAGE_ID, inComingMessageId);
@@ -434,12 +427,7 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                 MessageActivity.this.sendBroadcast(intentPicture);
                 break;
             case REQUEST_CAMERA:
-                Cursor cursor = this.getContentResolver().query(capturedImageURI,
-                        new String[]{MediaStore.Images.Media.DATA}, null, null, null);
-                int index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                cursor.moveToFirst();
-                String capturedImageFilePath = cursor.getString(index);
-                cursor.close();
+                String capturedImageFilePath = CommonMethod.getInstance().getPathFromUri(MessageActivity.this, data.getData());
                 Intent intentCamera = new Intent();
                 intentCamera.setAction(CommonValue.ACTION_SEND_MESSAGE);
                 intentCamera.putExtra(CommonValue.INCOMING_MESSAGE_ID, inComingMessageId);
@@ -450,18 +438,6 @@ public class MessageActivity extends AppCompatActivity implements View.OnClickLi
                 MessageActivity.this.sendBroadcast(intentCamera);
                 break;
         }
-    }
-
-    private String getPathFromUri(Uri uri) {
-        Cursor cursor = this.getContentResolver().query(uri,
-                new String[]{MediaStore.Images.Media.DATA}, null, null, null);
-        if (cursor == null) {
-            return null;
-        }
-        cursor.moveToFirst();
-        String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-        cursor.close();
-        return path;
     }
 
 

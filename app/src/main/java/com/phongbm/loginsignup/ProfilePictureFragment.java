@@ -76,14 +76,6 @@ public class ProfilePictureFragment extends Fragment implements View.OnClickList
             case R.id.layoutTakePhoto:
                 Intent intentTakePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (intentTakePhoto.resolveActivity(getActivity().getPackageManager()) != null) {
-                    @SuppressLint("SimpleDateFormat")
-                    String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-                    String fileName = "AHIHI_" + date;
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(MediaStore.Images.Media.TITLE, fileName);
-                    capturedImageURI = getActivity().getContentResolver().insert(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-                    intentTakePhoto.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageURI);
                     this.startActivityForResult(intentTakePhoto, REQUEST_TAKE_PHOTO);
                 } else {
                     Snackbar.make(view, "Device does not support camera", Snackbar.LENGTH_LONG)
@@ -137,12 +129,8 @@ public class ProfilePictureFragment extends Fragment implements View.OnClickList
                     imgAvatar.setImageBitmap(bitmapAvatar);
                     break;
                 case REQUEST_TAKE_PHOTO:
-                    Cursor cursor = getActivity().getContentResolver().query(capturedImageURI,
-                            new String[]{MediaStore.Images.Media.DATA}, null, null, null);
-                    int index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                    cursor.moveToFirst();
-                    String capturedImageFilePath = cursor.getString(index);
-                    cursor.close();
+                    String capturedImageFilePath = CommonMethod.getInstance().getPathFromUri(getActivity()
+                            .getBaseContext(), data.getData());
                     Intent intentCropImage = new Intent();
                     intentCropImage.setClass(getActivity(), ImageControl.class);
                     intentCropImage.putExtra(ImageControl.EXTRA_IMAGE, capturedImageFilePath);

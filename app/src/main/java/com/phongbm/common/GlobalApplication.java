@@ -21,7 +21,7 @@ public class GlobalApplication extends Application {
     private String fullName, phoneNumber, email;
     private Bitmap pictureSend;
     private ArrayList<AllFriendItem> allFriendItems;
-    private ArrayList<ActiveFriendItem> activeFriendItems;
+    private ArrayList<ActiveFriendItem> activeFriendItems = new ArrayList<>();
 
     private ArrayList<String> idUsers;
     volatile public static boolean checkLoginThisId = false;
@@ -93,6 +93,7 @@ public class GlobalApplication extends Application {
     }
 
     public ArrayList<AllFriendItem> getAllFriendItems() {
+        if ( allFriendItems == null ) allFriendItems = new ArrayList<>();
         return allFriendItems;
     }
 
@@ -101,6 +102,7 @@ public class GlobalApplication extends Application {
     }
 
     public ArrayList<ActiveFriendItem> getActiveFriendItems() {
+        if ( activeFriendItems == null )  activeFriendItems = new ArrayList<>();
         return activeFriendItems;
     }
 
