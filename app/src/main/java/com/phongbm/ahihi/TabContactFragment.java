@@ -25,11 +25,19 @@ public class TabContactFragment extends Fragment implements SwipeRefreshLayout.O
     private ListView listViewContact;
     private SwipeRefreshLayout swipeRefreshLayout;
 
-    public TabContactFragment(Context context) {
+    public TabContactFragment(Context context, ViewGroup viewGroup) {
         this.context = context;
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        view = layoutInflater.inflate(R.layout.tab_contact, null);
+        view = layoutInflater.inflate(R.layout.tab_contact, viewGroup, false);
         this.initializeComponent();
+    }
+
+    public static TabContactFragment instantTabContactFragment( Context context, ViewGroup viewGroup ) {
+        TabContactFragment tabContactFragment = new TabContactFragment(context, viewGroup);
+        Bundle args = new Bundle();
+        args.putString("address", "TabContactFragment");
+        tabContactFragment.setArguments(args);
+        return  tabContactFragment;
     }
 
     @Override

@@ -31,6 +31,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -134,7 +135,8 @@ public class MainActivity extends AppCompatActivity implements
         navigation = (NavigationView) findViewById(R.id.navigation);
         navigation.setNavigationItemSelectedListener(this);
 
-        viewPagerAdapter = new ViewPagerAdapter(this, this.getSupportFragmentManager());
+        viewPagerAdapter = new ViewPagerAdapter(this, this.getSupportFragmentManager(),
+                (ViewGroup) findViewById(android.R.id.content));
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         viewPager.setAdapter(viewPagerAdapter);
 

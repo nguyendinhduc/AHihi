@@ -59,10 +59,18 @@ public class TabFriendFragment extends Fragment implements View.OnClickListener,
     private SwipeRefreshLayout swipeRefreshLayout;
     private RelativeLayout layoutNote;
 
-    public TabFriendFragment(Context context) {
+    public TabFriendFragment(Context context, ViewGroup viewGroup) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         view = layoutInflater.inflate(R.layout.tab_friend, null);
         this.initializeComponent();
+    }
+
+    public static TabFriendFragment instantTabContactFragment( Context context, ViewGroup viewGroup ) {
+        TabFriendFragment tabFriendFragment = new TabFriendFragment(context, viewGroup);
+        Bundle args = new Bundle();
+        args.putString("address", "TabFriendFragment");
+        tabFriendFragment.setArguments(args);
+        return  tabFriendFragment;
     }
 
     @Override

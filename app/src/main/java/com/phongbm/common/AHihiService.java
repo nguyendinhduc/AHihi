@@ -243,8 +243,6 @@ public class AHihiService extends Service implements SinchClientListener,
     private class MessageListener implements MessageClientListener {
         @Override
         public void onIncomingMessage(final MessageClient messageClient, final Message message) {
-            sound.playMessageTone();
-
             if (message.getHeaders().get("MAP") != null) {
                 String body = message.getTextBody();
                 if (body.equals("MAP_OK")) {
@@ -395,6 +393,10 @@ public class AHihiService extends Service implements SinchClientListener,
                 intentIncoming.putExtra(CommonValue.MESSAGE_LOG_DATE, date);
                 intentIncoming.putExtra(CommonValue.MESSAGE_LOG_IS_READ, isRead);
                 AHihiService.this.sendBroadcast(intentIncoming);
+            }
+
+            if ( GlobalApplication.checkLoginThisId || GlobalApplication.startActivityMessage ) {
+                sound.playMessageTone();
             }
         }
 
@@ -572,20 +574,12 @@ public class AHihiService extends Service implements SinchClientListener,
         message.put("receiverId", id);
         message.put("content", content);
         message.put("date", date);
-        message.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e != null) {
-                    e.printStackTrace();
-                    return;
-                }
-                WritableMessage message = new WritableMessage(id, content);
-                message.addHeader("date", date);
-                message.addHeader("fullName", fullName);
-                message.addHeader("senderName", senderName);
-                messageClient.send(message);
-            }
-        });
+        message.saveEventually();
+        WritableMessage messageContnet = new WritableMessage(id, content);
+        messageContnet.addHeader("date", date);
+        messageContnet.addHeader("fullName", fullName);
+        messageContnet.addHeader("senderName", senderName);
+        messageClient.send(messageContnet);
     }
 
     private synchronized void sendFile(final String id, final String path,
@@ -741,7 +735,8 @@ public class AHihiService extends Service implements SinchClientListener,
             int height = options.outHeight;
             Pair<Integer, Integer> pair = CommonMethod.getInstance().getStandSizeBitmap(width,
                     height, WIDTH_IMAGE_MAX, HEIGHT_IMAGE_MAX);
-            bitmapSend = Bitmap.createScaledBitmap(bitmapSend, pair.first, pair.second, true);
+//            bitmapSend = Bitmap.createScaledBitmap(bitmapSend, pair.first, pair.second, true);
+            bitmapSend = CommonMethod.getInstance().decodeSampledBitmapFromResource(path, pair.first, pair.second);
             Toast.makeText(this, "OutOfMemoryError...", Toast.LENGTH_SHORT).show();
         }
         int orientation = CommonMethod.getInstance().getOrientation(path);

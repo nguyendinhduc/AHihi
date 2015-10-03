@@ -56,9 +56,9 @@ public class TabMessageFragment extends Fragment implements AdapterView.OnItemCl
     private RelativeLayout layoutNoConversations;
     private int positionLongItemClick = -1;
 
-    public TabMessageFragment(Context context) {
+    public TabMessageFragment(Context context, ViewGroup viewGroup) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        view = layoutInflater.inflate(R.layout.tab_message, null);
+        view = layoutInflater.inflate(R.layout.tab_message, viewGroup, false);
         this.initializeComponent();
         messagesLogDBManager = new MessagesLogDBManager(context);
 
@@ -76,6 +76,13 @@ public class TabMessageFragment extends Fragment implements AdapterView.OnItemCl
         }
     }
 
+    public static TabMessageFragment instantTabMessageFragment( Context context, ViewGroup viewGroup ) {
+        TabMessageFragment tabMessageFragment = new TabMessageFragment(context, viewGroup);
+        Bundle args = new Bundle();
+        args.putString("address", "TabMessageFragment");
+        tabMessageFragment.setArguments(args);
+        return  tabMessageFragment;
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

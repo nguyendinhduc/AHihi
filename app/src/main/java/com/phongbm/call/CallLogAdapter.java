@@ -72,8 +72,12 @@ public class CallLogAdapter extends BaseAdapter {
             colors.set(position, Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256)));
         }
         viewHolder.imgAvatar.setCircleColor(colors.get(position));
-        viewHolder.imgAvatar.setText(callLogItems.get(position).getFullName().substring(0, 1)
-                .toUpperCase());
+        try {
+            viewHolder.imgAvatar.setText(callLogItems.get(position).getFullName().substring(0, 1)
+                    .toUpperCase());
+        }catch ( Exception e ) {
+            e.printStackTrace();
+        }
         viewHolder.txtFullName.setText(callLogItems.get(position).getFullName());
         viewHolder.txtPhoneNumber.setText("Mobile " + callLogItems.get(position).getPhoneNumber());
         viewHolder.txtDate.setText(callLogItems.get(position).getDate());

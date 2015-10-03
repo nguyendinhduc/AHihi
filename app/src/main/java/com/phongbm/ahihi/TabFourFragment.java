@@ -35,12 +35,18 @@ public class TabFourFragment extends Fragment {
     private CircleImageView imgAvatar;
     private TextView txtFullName;
 
-    public TabFourFragment(Context context) {
+    public TabFourFragment(Context context, ViewGroup viewGroup) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        view = layoutInflater.inflate(R.layout.tab_four, null);
+        view = layoutInflater.inflate(R.layout.tab_four, viewGroup, false);
 
     }
-
+    public static TabFourFragment instantTabContactFragment( Context context, ViewGroup viewGroup ) {
+        TabFourFragment tabFourFragment = new TabFourFragment(context, viewGroup);
+        Bundle args = new Bundle();
+        args.putString("address", "TabFourFragment");
+        tabFourFragment.setArguments(args);
+        return  tabFourFragment;
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

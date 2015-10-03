@@ -14,6 +14,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -45,9 +46,11 @@ public class ImageControl extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_image_control);
         url = getIntent().getStringExtra(ImageControl.EXTRA_IMAGE);
+        commonMethod = CommonMethod.getInstance();
+        Log.i(TAG, "url: " + url);
         this.initializeLayoutImage();
         this.initializeComponent();
-        commonMethod = CommonMethod.getInstance();
+
     }
 
     private void initializeLayoutImage() {
