@@ -28,6 +28,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -75,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements
     private CoordinatorLayout coordinator;
     private BroadcastMain broadcastMain;
 
+    private View header;
+
     public static boolean isNetworkConnected(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
@@ -117,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements
     private void initializeComponent() {
         coordinator = (CoordinatorLayout) findViewById(R.id.coordinator);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
+
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 toolbar, R.string.open_navigation_drawer, R.string.close_navigation_drawer) {
             @Override
@@ -133,6 +137,8 @@ public class MainActivity extends AppCompatActivity implements
         actionBarDrawerToggle.syncState();
 
         navigation = (NavigationView) findViewById(R.id.navigation);
+        header = LayoutInflater.from(this).inflate(R.layout.header_navigation, navigation, false);
+        navigation.addHeaderView(header);
         navigation.setNavigationItemSelectedListener(this);
 
         viewPagerAdapter = new ViewPagerAdapter(this, this.getSupportFragmentManager(),
@@ -154,10 +160,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void initializeProfileInformation() {
-        imgAvatar = (CircleImageView) findViewById(R.id.imgAvatar);
+        imgAvatar = (CircleImageView) header.findViewById(R.id.imgAvatar);
         imgAvatar.setOnClickListener(this);
-        final TextView txtName = (TextView) findViewById(R.id.txtName);
-        final TextView txtEmail = (TextView) findViewById(R.id.txtEmail);
+        final TextView txtName = (TextView) header.findViewById(R.id.txtName);
+        final TextView txtEmail = (TextView) header.findViewById(R.id.txtEmail);
 
         if (((GlobalApplication) getApplication()).getAvatar() != null) {
             imgAvatar.setImageBitmap(((GlobalApplication) getApplication()).getAvatar());
