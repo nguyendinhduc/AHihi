@@ -115,7 +115,7 @@
                     android:contentDescription="@null"
                     android:padding="12dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_message_microphone"
+                    android:src="@drawable/ic_message_microphone_on"
                     android:tint="#9e9e9e" />
 
                 <ImageView

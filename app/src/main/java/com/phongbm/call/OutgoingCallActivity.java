@@ -40,7 +40,8 @@ public class OutgoingCallActivity extends AppCompatActivity implements View.OnCl
     private static final int UPDATE_TIME_CALL = 1000;
     private static final int NOTIFICATION_CALLING = 0;
 
-    private ImageView btnEndCall, btnRingtone;
+    private ImageView btnEndCall, btnRingtone, btnMicrophone;
+    private boolean isSpeaker = false;
     private TextView txtTime, txtFullName, txtPhoneNumber;
     private CircleImageView imgAvatar;
     private CallingRippleView callingRipple;
@@ -51,6 +52,8 @@ public class OutgoingCallActivity extends AppCompatActivity implements View.OnCl
     private Thread threadTimeCall;
     private CommonMethod commonMethod;
     private CallLogsDBManager callLogsDBManager;
+    private AudioManager audioManager = null;
+
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -83,11 +86,16 @@ public class OutgoingCallActivity extends AppCompatActivity implements View.OnCl
         btnEndCall.setOnClickListener(this);
         btnRingtone = (ImageView) findViewById(R.id.btnRingtone);
         btnRingtone.setOnClickListener(this);
+        btnMicrophone = (ImageView)findViewById(R.id.btnMicrophone);
+        btnMicrophone.setOnClickListener(this);
         txtTime = (TextView) findViewById(R.id.txtTime);
         txtFullName = (TextView) findViewById(R.id.txtFullName);
         txtPhoneNumber = (TextView) findViewById(R.id.txtPhoneNumber);
         imgAvatar = (CircleImageView) findViewById(R.id.imgAvatar);
         callingRipple = (CallingRippleView) findViewById(R.id.callingRipple);
+
+        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setMode(AudioManager.MODE_IN_CALL);
 
         Intent intent = this.getIntent();
         id = intent.getStringExtra(CommonValue.INCOMING_CALL_ID);
@@ -137,6 +145,17 @@ public class OutgoingCallActivity extends AppCompatActivity implements View.OnCl
                         .getSystemService(Context.AUDIO_SERVICE);
                 audioManager.adjustStreamVolume(AudioManager.STREAM_RING,
                         AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
+                break;
+            case R.id.btnMicrophone:
+                isSpeaker = !isSpeaker;
+                if ( isSpeaker ) {
+                    btnMicrophone.setImageResource(R.drawable.ic_message_microphone_on);
+                    OutgoingCallActivity.this.audioManager.setSpeakerphoneOn(true);
+                }
+                else {
+                    btnMicrophone.setImageResource(R.drawable.ic_message_microphone_off);
+                    OutgoingCallActivity.this.audioManager.setSpeakerphoneOn(false);
+                }
                 break;
         }
     }
@@ -219,6 +238,11 @@ public class OutgoingCallActivity extends AppCompatActivity implements View.OnCl
         callLogsDBManager.closeDatabase();
         ((NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE))
                 .cancel(NOTIFICATION_CALLING);
+
+        if ( audioManager != null ) {
+            audioManager.setMode(AudioManager.MODE_NORMAL);
+            audioManager.setSpeakerphoneOn(false);
+        }
         super.onDestroy();
     }
 

@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -42,7 +43,7 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
     private static final int NOTIFICATION_CALLING = 0;
     private static final int NOTIFICATION_MISSED_CALL = 1;
 
-    private ImageView btnAnswer, btnEndCall;
+    private ImageView btnAnswer, btnEndCall, btnMicrophone;
     private TextView txtTime, txtFullName, txtPhoneNumber;
     private CircleImageView imgAvatar;
     private CallingRippleView callingRipple;
@@ -55,6 +56,8 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
     private CommonMethod commonMethod;
     private CallLogsDBManager callLogsDBManager;
     private Vibrator vibrator;
+    private AudioManager audioManager;
+    private boolean isSpeaker = false;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -90,6 +93,7 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
         commonMethod = CommonMethod.getInstance();
         commonMethod.pushNotification(this, MainActivity.class, "Calling...",
                 NOTIFICATION_CALLING, R.drawable.ic_notification_calling, true);
+
     }
 
     private void initializeComponent() {
@@ -97,11 +101,16 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
         btnAnswer.setOnClickListener(this);
         btnEndCall = (ImageView) findViewById(R.id.btnEndCall);
         btnEndCall.setOnClickListener(this);
+        btnMicrophone = (ImageView)findViewById(R.id.btnMicrophone);
+        btnMicrophone.setOnClickListener(this);
         txtTime = (TextView) findViewById(R.id.txtTime);
         txtFullName = (TextView) findViewById(R.id.txtFullName);
         txtPhoneNumber = (TextView) findViewById(R.id.txtPhoneNumber);
         imgAvatar = (CircleImageView) findViewById(R.id.imgAvatar);
         callingRipple = (CallingRippleView) findViewById(R.id.callingRipple);
+
+        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setMode(AudioManager.MODE_IN_CALL);
 
         id = this.getIntent().getStringExtra(CommonValue.OUTGOING_CALL_ID);
         ParseQuery<ParseUser> parseQuery = ParseUser.getQuery();
@@ -158,6 +167,17 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
                 Intent intentHangup = new Intent(CommonValue.ACTION_END_CALL);
                 this.sendBroadcast(intentHangup);
                 break;
+            case R.id.btnMicrophone:
+                isSpeaker = !isSpeaker;
+                if ( isSpeaker ) {
+                    btnMicrophone.setImageResource(R.drawable.ic_message_microphone_on);
+                    InComingCallActivity.this.audioManager.setSpeakerphoneOn(true);
+                }
+                else {
+                    btnMicrophone.setImageResource(R.drawable.ic_message_microphone_off);
+                    InComingCallActivity.this.audioManager.setSpeakerphoneOn(false);
+                }
+                break;
         }
     }
 
@@ -180,6 +200,10 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
                     threadTimeCall.start();
                     InComingCallActivity.this.setVolumeControlStream(
                             AudioManager.STREAM_VOICE_CALL);
+//                    audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+//                    audioManager.setMode(AudioManager.MODE_IN_CALL);
+//                    audioManager.setSpeakerphoneOn(true);
+
                     break;
                 case CommonValue.STATE_END_CALL:
                     if (timeCall != 0) {
@@ -241,6 +265,10 @@ public class InComingCallActivity extends AppCompatActivity implements View.OnCl
         callLogsDBManager.closeDatabase();
         ((NotificationManager) InComingCallActivity.this.
                 getSystemService(Context.NOTIFICATION_SERVICE)).cancel(NOTIFICATION_CALLING);
+        if ( audioManager != null ) {
+            audioManager.setMode(AudioManager.MODE_NORMAL);
+            audioManager.setSpeakerphoneOn(false);
+        }
         super.onDestroy();
     }
 
