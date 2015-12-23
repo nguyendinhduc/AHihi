@@ -18,7 +18,7 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
         fragments.add(TabMessageFragment.instantTabMessageFragment(context, viewGroup));
         fragments.add(TabContactFragment.instantTabContactFragment(context, viewGroup));
         fragments.add(TabFriendFragment.instantTabContactFragment(context, viewGroup));
-        fragments.add(TabFourFragment.instantTabContactFragment(context, viewGroup));
+        fragments.add(TabSettingFragment.instantTabContactFragment(context, viewGroup));
     }
 
     @Override

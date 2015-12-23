@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -26,8 +25,8 @@ import java.util.ArrayList;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 @SuppressLint("ValidFragment")
-public class TabFourFragment extends Fragment {
-    private static final String TAG = "TabFourFragment";
+public class TabSettingFragment extends Fragment {
+    private static final String TAG = "TabSettingFragment";
     private View view;
     private ListView listSettting;
     private ArrayList<ItemSetting> itemSettings;
@@ -35,15 +34,15 @@ public class TabFourFragment extends Fragment {
     private CircleImageView imgAvatar;
     private TextView txtFullName;
 
-    public TabFourFragment(Context context, ViewGroup viewGroup) {
+    public TabSettingFragment(Context context, ViewGroup viewGroup) {
 //        LayoutInflater layoutInflater = LayoutInflater.from(context);
-//        view = layoutInflater.inflate(R.layout.tab_four, viewGroup, false);
+//        view = layoutInflater.inflate(R.layout.tab_setting, viewGroup, false);
 
     }
-    public static TabFourFragment instantTabContactFragment( Context context, ViewGroup viewGroup ) {
-        TabFourFragment tabFourFragment = new TabFourFragment(context, viewGroup);
+    public static TabSettingFragment instantTabContactFragment( Context context, ViewGroup viewGroup ) {
+        TabSettingFragment tabFourFragment = new TabSettingFragment(context, viewGroup);
         Bundle args = new Bundle();
-        args.putString("address", "TabFourFragment");
+        args.putString("address", "TabSettingFragment");
         tabFourFragment.setArguments(args);
         return  tabFourFragment;
     }
@@ -58,7 +57,7 @@ public class TabFourFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView()...");
 //        LayoutInflater layoutInflater = LayoutInflater.from(context);
-        view = inflater.inflate(R.layout.tab_four, container, false);
+        view = inflater.inflate(R.layout.tab_setting, container, false);
         this.initializeComponent();
         return view;
     }
@@ -176,7 +175,7 @@ public class TabFourFragment extends Fragment {
 
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            Toast.makeText(TabFourFragment.this.getContext(), "" + isChecked, Toast.LENGTH_SHORT).show();
+            Toast.makeText(TabSettingFragment.this.getContext(), "" + isChecked, Toast.LENGTH_SHORT).show();
             if (isChecked) {
             } else {
 
