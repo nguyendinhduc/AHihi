@@ -17,10 +17,12 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -30,9 +32,11 @@ import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.ProgressCallback;
 import com.parse.SaveCallback;
@@ -57,10 +61,14 @@ import com.sinch.android.rtc.messaging.MessageClientListener;
 import com.sinch.android.rtc.messaging.MessageDeliveryInfo;
 import com.sinch.android.rtc.messaging.MessageFailureInfo;
 import com.sinch.android.rtc.messaging.WritableMessage;
+import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -101,6 +109,7 @@ public class AHihiService extends Service implements SinchClientListener,
             context = this;
         }
         this.registerBroadcast();
+        if (((GlobalApplication) getApplication()).getAvatar() == null) loadBitmapAvatar();
         commonMethod = CommonMethod.getInstance();
         if (messagesLogDBManager == null) {
             messagesLogDBManager = new MessagesLogDBManager(this);
@@ -149,6 +158,33 @@ public class AHihiService extends Service implements SinchClientListener,
             sinchClient.addSinchClientListener(this);
             sinchClient.checkManifest();
             sinchClient.start();
+        }
+
+    }
+
+    private void loadBitmapAvatar() {
+        ParseUser parseUser = ParseUser.getCurrentUser();
+        if (parseUser != null) {
+            ParseFile parseFile = parseUser.getParseFile("avatar");
+            if (parseFile != null) {
+                String urlAvatar = parseFile.getUrl();
+                new AsyncTask<String, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(String... params) {
+                        URL url = null;
+                        try {
+                            url = new URL(params[0]);
+                            Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+                            ((GlobalApplication) getApplication()).setAvatar(bmp);
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+                }.execute(urlAvatar);
+            }
         }
     }
 
@@ -337,11 +373,11 @@ public class AHihiService extends Service implements SinchClientListener,
                 intentSent.putExtra(CommonValue.MESSAGE_CONTENT, content);
                 AHihiService.this.sendBroadcast(intentSent);
             }
-            String id = message.getSenderId();
+            final String id = message.getSenderId();
             Map<String, String> header = message.getHeaders();
             String fullName = header.get("senderName");
             String name;
-            if ( fullName == null ) return;
+            if (fullName == null) return;
             if (fullName.contains(" ")) {
                 name = fullName.substring(0, fullName.indexOf(" ") + 1);
             } else {
@@ -368,16 +404,16 @@ public class AHihiService extends Service implements SinchClientListener,
                 isRead = 0;
             }
 
-           if ( GlobalApplication.checkLoginThisId ) {
-               if (tasks.get(0).processName.equals(CommonValue.PACKAGE_NAME_MAIN)) {
-               } else {
-                   if (!open) {
-                       open = true;
-                       AHihiService.this.openChatHead(message.getSenderId(),
-                               message.getHeaders().get("senderName"), content, date);
-                   }
-               }
-           }
+//           if ( GlobalApplication.checkLoginThisId ) {
+            if (tasks.get(0).processName.equals(CommonValue.PACKAGE_NAME_MAIN)) {
+            } else {
+                if (!open) {
+                    open = true;
+                    AHihiService.this.openChatHead(message.getSenderId(),
+                            message.getHeaders().get("senderName"), content, date);
+                }
+            }
+//           }
 
             AHihiService.this.updateMessagesLogDBManager(id, fullName, content, date, isRead);
             if (!GlobalApplication.startWaitingAHihi) {
@@ -398,7 +434,7 @@ public class AHihiService extends Service implements SinchClientListener,
                 AHihiService.this.sendBroadcast(intentIncoming);
             }
 
-            if ( GlobalApplication.checkLoginThisId || GlobalApplication.startActivityMessage ) {
+            if (GlobalApplication.checkLoginThisId || GlobalApplication.startActivityMessage) {
                 sound.playMessageTone();
             }
         }
@@ -755,7 +791,7 @@ public class AHihiService extends Service implements SinchClientListener,
     private void openChatHead(final String id, final String fullName, final String content, final String date) {
         layoutInflater = LayoutInflater.from(this);
         widget = (RelativeLayout) layoutInflater.inflate(R.layout.widget_chathead, null, false);
-        CircleImageView imgAvatar = (CircleImageView) widget.findViewById(R.id.imgAvatar);
+        final CircleImageView imgAvatar = (CircleImageView) widget.findViewById(R.id.imgAvatar);
         int index = ((GlobalApplication) AHihiService.this.getApplication()).getAllFriendItems()
                 .indexOf(new AllFriendItem(id, 1));
         if (index > -1) {
@@ -763,6 +799,32 @@ public class AHihiService extends Service implements SinchClientListener,
                     .getApplication()).getAllFriendItems().get(index).getAvatar());
         } else {
             imgAvatar.setImageResource(R.drawable.ic_avatar_default);
+            ParseQuery<ParseUser> query = ParseUser.getQuery();
+            query.whereEqualTo("objectId", id);
+            query.setLimit(1);
+            query.findInBackground(new FindCallback<ParseUser>() {
+                @Override
+                public void done(List<ParseUser> list, ParseException e) {
+                    if (e == null) {
+                        ParseFile parseFile = list.get(0).getParseFile("avatar");
+                        if (parseFile != null) {
+                            String urlAvatar = parseFile.getUrl();
+                            if (urlAvatar != null) {
+                                Picasso.with(AHihiService.this)
+                                        .load(urlAvatar)
+                                        .placeholder(R.drawable.ic_avatar_default)
+                                        .error(R.drawable.ic_avatar_default)
+                                        .into(imgAvatar);
+                            }
+
+                        }
+                    } else {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
         }
         widget.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -796,7 +858,7 @@ public class AHihiService extends Service implements SinchClientListener,
         floatingViewManager.setFixedTrashIconImage(R.drawable.ic_trash_fixed);
         floatingViewManager.setActionTrashIconImage(R.drawable.ic_trash_action);
         floatingViewManager.addViewToWindow(widget, FloatingViewManager.SHAPE_CIRCLE,
-                (int) (16 * displayMetrics.density));
+                (int) (-16 * displayMetrics.density));
     }
 
     private synchronized void updateMessagesLogDBManager(String id, String fullName, String message,

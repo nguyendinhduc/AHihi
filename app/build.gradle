@@ -43,5 +43,5 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:+'
     compile 'com.hudomju:swipe-to-dismiss-undo:+'
     compile 'com.squareup.picasso:picasso:+'
-    compile 'com.github.recruit-lifestyle:FloatingView:+'
+    compile 'com.github.recruit-lifestyle:FloatingView:1.7'
 }
